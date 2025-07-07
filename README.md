@@ -46,11 +46,28 @@ pip install qiskit qiskit-aer qiskit-ibm-runtime matplotlib numpy scipy networkx
 pip install pennylane cirq tensorflow-quantum
 ```
 
+### Quick Start - Interactive GUI
+Launch the interactive Quantum Computing Explorer:
+```bash
+python launch_gui.py
+```
+
+The GUI provides:
+- 🌊 **Superposition demonstrations** with live circuit visualization
+- 🔗 **Entanglement experiments** showing quantum correlations
+- 🌀 **Interference effects** in quantum algorithms
+- 🧬 **Medical applications** explanations and examples
+- 🌌 **Cosmology simulations** for black holes and dark matter
+- 🤖 **Quantum ML** concepts and implementations
+
 ### Project Structure
 - `src/medical/` - Medical and biological quantum algorithms
 - `src/cosmology/` - Astrophysics and cosmology simulations
 - `src/ml/` - Quantum machine learning implementations
 - `scripts/` - Utility scripts and runners
+- `gui/` - Interactive GUI application
+- `examples/` - Runnable quantum computing examples
+- `notebooks/` - Jupyter notebooks for learning
 - `docs/` - Documentation and research papers
 
 ## 🚀 Featured Algorithms
