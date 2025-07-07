@@ -11,6 +11,9 @@ pennylane>=0.32.0
 cirq>=1.2.0
 tensorflow-quantum>=0.7.3
 
+# GUI framework
+PyQt5>=5.15.0
+
 # Scientific computing
 numpy>=1.24.0
 scipy>=1.10.0
