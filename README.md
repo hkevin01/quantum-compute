@@ -40,16 +40,53 @@ This repository contains experimental quantum computing algorithms and simulatio
 
 ## 🛠 Getting Started
 
-### Prerequisites
+### Easy Setup (Recommended)
+Use the automated setup script:
 ```bash
+# Make script executable and run
+chmod +x run.sh
+./run.sh
+```
+
+This will automatically:
+- Check Python version (3.7+ required)
+- Create virtual environment
+- Install all dependencies
+- Launch the GUI
+
+### Manual Setup
+If you prefer manual installation:
+```bash
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install core dependencies
 pip install qiskit qiskit-aer qiskit-ibm-runtime matplotlib numpy scipy networkx
-pip install pennylane cirq tensorflow-quantum
+pip install pennylane cirq PyQt5 pylatexenc
+
+# Optional: Install additional packages
+pip install -r requirements.txt
 ```
 
 ### Quick Start - Interactive GUI
 Launch the interactive Quantum Computing Explorer:
 ```bash
+# Using the run script (recommended)
+./run.sh gui
+
+# Or manually
 python launch_gui.py
+```
+
+### Other Run Options
+```bash
+./run.sh demos        # Interactive command-line demonstrations
+./run.sh test          # Run quantum computing tests  
+./run.sh examples      # Basic quantum examples
+./run.sh crispr        # CRISPR optimization demo
+./run.sh blackhole     # Black hole simulation
+./run.sh help          # Show all options
 ```
 
 The GUI provides:
