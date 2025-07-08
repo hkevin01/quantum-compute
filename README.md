@@ -1,42 +1,14 @@
-# Quantum Computing Research Projects
+# Quantum Computing Explorer
 
-This repository contains experimental quantum computing algorithms and simulations for cutting-edge research applications including medical genomics, cosmology, and quantum machine learning.
+This repository contains quantum computing demonstrations and algorithms designed to run on real quantum hardware, focusing on NISQ-era applications.
 
-## 🧬 Medical & Biological Applications
+## 🚀 Hardware-Ready Quantum Demos
 
-### CRISPR Optimization
-- Quantum algorithms for optimizing CRISPR-Cas9 guide RNA selection
-- Protein folding simulations using quantum annealing
-- Drug discovery molecular optimization
-
-### Genomic Analysis
-- Quantum-enhanced sequence alignment algorithms
-- Population genetics simulation with quantum speedup
-- Biomarker discovery using quantum machine learning
-
-## 🌌 Cosmology & Physics Applications
-
-### Black Hole Simulations
-- Quantum simulation of Hawking radiation
-- Information paradox exploration using quantum error correction
-- Spacetime geometry optimization problems
-
-### Dark Matter Research
-- Quantum algorithms for dark matter detection optimization
-- Gravitational wave data analysis enhancement
-- Quantum field theory simulations
-
-## 🤖 Quantum Machine Learning
-
-### Healthcare AI
-- Quantum neural networks for medical diagnosis
-- Drug interaction prediction models
-- Genetic risk assessment algorithms
-
-### Advanced Optimization
-- Variational Quantum Eigensolvers (VQE) for molecular systems
-- Quantum Approximate Optimization Algorithm (QAOA) applications
-- Quantum reinforcement learning for complex problems
+This project provides a collection of quantum circuits that are optimized for today's quantum computers. These examples are:
+- **Simple**: Using 1-4 qubits.
+- **Shallow**: Low gate depth to minimize noise.
+- **Fundamental**: Demonstrating core quantum phenomena like superposition and entanglement.
+- **Practical**: Including NISQ algorithms like VQE and QAOA.
 
 ## 🛠 Getting Started
 
@@ -50,9 +22,9 @@ chmod +x run.sh
 
 This will automatically:
 - Check Python version (3.7+ required)
-- Create virtual environment
-- Install all dependencies
-- Launch the GUI
+- Create a virtual environment
+- Install all necessary dependencies
+- Launch the Quantum Explorer GUI
 
 ### Manual Setup
 If you prefer manual installation:
@@ -61,12 +33,8 @@ If you prefer manual installation:
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install core dependencies
-pip install qiskit qiskit-aer qiskit-ibm-runtime matplotlib numpy scipy networkx
-pip install pennylane cirq PyQt5 pylatexenc
-
-# Optional: Install additional packages
-pip install -r requirements.txt
+# Install dependencies
+pip install qiskit qiskit-aer qiskit-ibm-runtime matplotlib numpy PyQt5 pylatexenc
 ```
 
 ### Quick Start - Interactive GUI
@@ -84,60 +52,30 @@ python launch_gui.py
 ./run.sh demos        # Interactive command-line demonstrations
 ./run.sh test          # Run quantum computing tests  
 ./run.sh examples      # Basic quantum examples
-./run.sh crispr        # CRISPR optimization demo
-./run.sh blackhole     # Black hole simulation
+./run.sh nisq          # NISQ-optimized quantum algorithms
+./run.sh hardware      # Hardware-ready quantum demos
 ./run.sh help          # Show all options
 ```
 
 The GUI provides:
 - 🌊 **Superposition demonstrations** with live circuit visualization
 - 🔗 **Entanglement experiments** showing quantum correlations
-- 🌀 **Interference effects** in quantum algorithms
-- 🧬 **Medical applications** explanations and examples
-- 🌌 **Cosmology simulations** for black holes and dark matter
-- 🤖 **Quantum ML** concepts and implementations
+- 🔬 **NISQ algorithms** optimized for real quantum computers
+- 🚀 **Hardware-ready demos** perfect for testing quantum devices
 
 ### Project Structure
-- `src/medical/` - Medical and biological quantum algorithms
-- `src/cosmology/` - Astrophysics and cosmology simulations
-- `src/ml/` - Quantum machine learning implementations
-- `scripts/` - Utility scripts and runners
 - `gui/` - Interactive GUI application
 - `examples/` - Runnable quantum computing examples
 - `notebooks/` - Jupyter notebooks for learning
-- `docs/` - Documentation and research papers
+- `docs/` - Documentation and guides
 
-## 🚀 Featured Algorithms
+## 📚 Learning Resources
 
-1. **Quantum CRISPR Guide RNA Optimizer** - Uses QAOA to find optimal guide RNA sequences
-2. **Black Hole Information Simulator** - Explores the information paradox using quantum circuits
-3. **Protein Folding VQE** - Variational quantum eigensolver for protein structure prediction
-4. **Quantum Medical Diagnosis** - Quantum neural networks for disease classification
-5. **Dark Matter Detection Optimizer** - Quantum algorithms for experimental parameter optimization
-
-## 📊 Current Status
-
-- ✅ Basic quantum circuit implementations
-- ✅ CRISPR optimization algorithms
-- 🚧 Black hole information simulations
-- 🚧 Quantum ML for medical diagnosis
-- 📝 Protein folding VQE (planned)
-
-## 🔬 Research Areas
-
-This project explores the intersection of quantum computing with:
-- **Bioinformatics**: Sequence analysis, protein prediction, drug discovery
-- **Cosmology**: Black hole physics, quantum gravity, information theory
-- **Medicine**: Personalized treatment, diagnostic algorithms, genetic analysis
-- **Physics**: Quantum field theory, many-body systems, condensed matter
-
-## 📚 References
-
-- Quantum algorithms for scientific computing (Nature Reviews)
-- NISQ algorithms for near-term quantum devices
-- Variational quantum algorithms for optimization problems
-- Quantum machine learning applications in healthcare
+- `docs/quantum_computing_guide.md`: A guide to fundamental quantum computing concepts.
+- `docs/qiskit_guide.md`: A guide to using the Qiskit framework.
+- `docs/space_medical_quantum_applications.md`: Documentation of advanced quantum applications (planned for future development).
+- `notebooks/quantum_basics_tutorial.ipynb`: An interactive Jupyter notebook for learning quantum basics.
 
 ---
 
-*Note: This is experimental research code. Quantum advantage for these applications is still an active area of research.*
+*Note: These examples are designed for educational and experimental purposes on real quantum hardware. For advanced applications like medical genomics and cosmology, see the documentation in `docs/space_medical_quantum_applications.md`.*

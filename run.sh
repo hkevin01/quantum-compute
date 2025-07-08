@@ -173,50 +173,52 @@ show_help() {
     echo "  setup        Set up environment and install dependencies only"
     echo "  clean        Remove virtual environment"
     echo "  examples     Run basic quantum examples"
-    echo "  crispr       Run CRISPR optimization demo"
-    echo "  blackhole    Run black hole simulation"
+    echo "  nisq         Run NISQ-optimized quantum algorithms"
+    echo "  hardware     Run hardware-ready quantum demos"
     echo "  help         Show this help message"
     echo ""
     echo "Examples:"
     echo "  ./run.sh              # Launch GUI (default)"
     echo "  ./run.sh gui          # Launch GUI explicitly"
     echo "  ./run.sh demos        # Run interactive demos"
+    echo "  ./run.sh nisq         # Run NISQ algorithms"
+    echo "  ./run.sh hardware     # Run hardware-ready demos"
     echo "  ./run.sh test         # Run tests"
     echo "  ./run.sh setup        # Setup only"
 }
 
-# Function to run specific examples
-run_examples() {
+# Function to run basic quantum examples
+run_basic_examples() {
     print_step "Running basic quantum examples..."
     
     if [ -f "examples/basic_quantum_examples.py" ]; then
         $PYTHON_CMD examples/basic_quantum_examples.py
     else
-        print_error "Basic examples not found!"
+        print_error "Basic quantum examples not found!"
         exit 1
     fi
 }
 
-# Function to run CRISPR demo
-run_crispr() {
-    print_step "Running CRISPR optimization demonstration..."
+# Function to run NISQ examples
+run_nisq() {
+    print_step "Running NISQ-optimized quantum algorithms..."
     
-    if [ -f "scripts/run_crispr_optimizer.py" ]; then
-        $PYTHON_CMD scripts/run_crispr_optimizer.py
+    if [ -f "examples/nisq_examples.py" ]; then
+        $PYTHON_CMD examples/nisq_examples.py
     else
-        print_error "CRISPR script not found!"
+        print_error "NISQ examples not found!"
         exit 1
     fi
 }
 
-# Function to run black hole simulation
-run_blackhole() {
-    print_step "Running black hole simulation..."
+# Function to run hardware-ready demos
+run_hardware() {
+    print_step "Running hardware-ready quantum demos..."
     
-    if [ -f "scripts/run_black_hole_sim.py" ]; then
-        $PYTHON_CMD scripts/run_black_hole_sim.py
+    if [ -f "examples/hardware_ready_demo.py" ]; then
+        $PYTHON_CMD examples/hardware_ready_demo.py
     else
-        print_error "Black hole simulation script not found!"
+        print_error "Hardware-ready demos not found!"
         exit 1
     fi
 }
@@ -267,19 +269,31 @@ main() {
             check_python
             setup_venv
             install_dependencies
-            run_examples
+            run_basic_examples
             ;;
-        "crispr")
+        "nisq")
             check_python
             setup_venv
             install_dependencies
-            run_crispr
+            run_nisq
             ;;
-        "blackhole")
+        "hardware")
             check_python
             setup_venv
             install_dependencies
-            run_blackhole
+            run_hardware
+            ;;
+        "nisq")
+            check_python
+            setup_venv
+            install_dependencies
+            run_nisq
+            ;;
+        "hardware")
+            check_python
+            setup_venv
+            install_dependencies
+            run_hardware
             ;;
         "clean")
             clean_env

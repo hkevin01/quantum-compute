@@ -1,31 +1,31 @@
 #!/usr/bin/env python3
 """
-Quantum Computing Explorer GUI
+Quantum Hardware Explorer GUI.
 
-An interactive GUI for exploring quantum computing examples and algorithms.
-Each tab demonstrates a different quantum concept with visualizations and explanations.
+An interactive GUI for exploring quantum algorithms designed for real hardware.
 """
 
 import os
 import sys
 
-import matplotlib.pyplot as plt
-import numpy as np
+import matplotlib
+
+# Set the backend before importing other matplotlib modules
+matplotlib.use('Qt5Agg')
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 try:
-    from PyQt5.QtCore import Qt, pyqtSignal
-    from PyQt5.QtGui import QFont, QPixmap
+    from PyQt5.QtCore import Qt
+    from PyQt5.QtGui import QFont
     from PyQt5.QtWidgets import (
         QApplication,
-        QFrame,
         QHBoxLayout,
         QLabel,
         QMainWindow,
         QMessageBox,
         QPushButton,
-        QScrollArea,
         QSplitter,
         QTabWidget,
         QTextEdit,
@@ -36,526 +36,340 @@ except ImportError:
     print("PyQt5 not found. Install with: pip install PyQt5")
     sys.exit(1)
 
-# Add the src directory to the path so we can import our modules
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
+# Add the examples directory to the path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'examples'))
 
 try:
-    import basic_quantum_examples
-    import quantum_algorithms
-    from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, transpile
-    from qiskit.quantum_info import Statevector
-    from qiskit.visualization import plot_bloch_multivector, plot_histogram
+    # Import the hardware-ready and NISQ example modules
+    import hardware_ready_demo
+    import nisq_examples
+    from qiskit.visualization import plot_histogram
     from qiskit_aer import AerSimulator
 except ImportError as e:
     print(f"Warning: Could not import quantum modules: {e}")
     print("Make sure Qiskit is installed: pip install qiskit qiskit-aer")
-    print("Make sure Qiskit is installed: pip install qiskit qiskit-aer")
-
+    sys.exit(1)
 
 
 class QuantumExplorerGUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Quantum Computing Explorer")
-        self.setGeometry(100, 100, 1400, 900)
-        
-        # Initialize simulator
+        self.setWindowTitle("Quantum Hardware Explorer")
+        self.setGeometry(100, 100, 1200, 800)
+
         self.simulator = AerSimulator()
-        
-        # Create main widget and layout
+        self.nisq_examples = nisq_examples.NISQQuantumExamples()
+        self.hardware_demos = hardware_ready_demo.HardwareReadyQuantumDemos()
+
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
         main_layout = QVBoxLayout(main_widget)
-        
-        # Create tab widget
+
         self.tab_widget = QTabWidget()
         main_layout.addWidget(self.tab_widget)
-        
-        # Create tabs
+
         self.create_introduction_tab()
-        self.create_superposition_tab()
-        self.create_entanglement_tab()
-        self.create_interference_tab()
-        self.create_quantum_algorithms_tab()
-        self.create_quantum_ml_tab()
-        self.create_medical_applications_tab()
-        self.create_cosmology_tab()
-        
-        # Set application style
+        self.create_nisq_algorithms_tab()
+        self.create_hardware_ready_tab()
+
         self.setStyleSheet("""
-            QMainWindow {
-                background-color: #f0f0f0;
-            }
-            QTabWidget::pane {
-                border: 1px solid #cccccc;
-                background-color: white;
-            }
-            QTabWidget::tab-bar {
-                alignment: left;
-            }
-            QTabBar::tab {
-                background-color: #e0e0e0;
-                padding: 8px 16px;
-                margin-right: 2px;
-                border-top-left-radius: 4px;
-                border-top-right-radius: 4px;
-            }
-            QTabBar::tab:selected {
-                background-color: white;
-                border-bottom: 2px solid #007acc;
-            }
-            QPushButton {
-                background-color: #007acc;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #005a9f;
-            }
-            QPushButton:pressed {
-                background-color: #004080;
-            }
+            QMainWindow { background-color: #f0f0f0; }
+            QTabWidget::pane { border: 1px solid #cccccc; background-color: white; }
+            QTabWidget::tab-bar { alignment: left; }
+            QTabBar::tab { background-color: #e0e0e0; padding: 8px 16px; margin-right: 2px; border-top-left-radius: 4px; border-top-right-radius: 4px; }
+            QTabBar::tab:selected { background-color: white; border-bottom: 2px solid #007acc; }
+            QPushButton { background-color: #007acc; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; }
+            QPushButton:hover { background-color: #005a9f; }
+            QPushButton:pressed { background-color: #004080; }
         """)
-    
+
     def create_introduction_tab(self):
-        """Introduction to quantum computing concepts"""
         widget = QWidget()
         self.tab_widget.addTab(widget, "🚀 Introduction")
-        
         layout = QVBoxLayout(widget)
-        
-        # Create scrollable text area
         text_edit = QTextEdit()
         text_edit.setReadOnly(True)
         text_edit.setFont(QFont("Arial", 11))
-        
-        content = """
-🌟 Welcome to Quantum Computing Explorer! 🌟
+        content = '''
+<div style="font-family: Arial; font-size: 11pt;">
+    <h2>🌟 Welcome to the Quantum Hardware Demo Explorer!</h2>
+    <p>This interactive application demonstrates quantum algorithms that are
+    designed to run on <b>real quantum computers</b>.</p>
 
-This interactive application demonstrates the fascinating world of quantum computing through practical examples and visualizations.
+    <h3>🔬 What is NISQ?</h3>
+    <p>We are currently in the <b>NISQ (Noisy Intermediate-Scale Quantum)</b>
+    era. This means that today's quantum computers have a limited number of
+    qubits (typically 50-1000) and are susceptible to noise, which can
+    corrupt calculations.</p>
 
-🔬 What Makes Quantum Computing Special?
+    <p>The algorithms in this explorer are specifically designed to be:</p>
+    <ul>
+        <li><b>Shallow</b>: They have a low number of sequential operations
+        (low "depth") to reduce the impact of noise.</li>
+        <li><b>Efficient</b>: They use a small number of qubits.</li>
+        <li><b>Hybrid</b>: They often combine classical and quantum computation to
+        solve practical problems.</li>
+    </ul>
 
-Unlike classical computers that use bits (0 or 1), quantum computers use quantum bits (qubits) that can exist in multiple states simultaneously. This leads to three key quantum phenomena:
-
-1. 🌊 SUPERPOSITION
-   • Qubits can be in a combination of 0 and 1 states simultaneously
-   • Like a coin spinning in the air - it's both heads and tails until it lands
-   • Classical equivalent: Checking every path in a maze one by one
-   • Quantum advantage: Exploring all paths simultaneously
-
-2. 🔗 ENTANGLEMENT
-   • Qubits can be mysteriously connected across any distance
-   • Measuring one instantly affects its entangled partner
-   • Einstein called this "spooky action at a distance"
-   • Enables quantum teleportation and cryptography
-
-3. 🌀 INTERFERENCE
-   • Quantum states can amplify or cancel each other out
-   • Like waves in water - they can constructively or destructively interfere
-   • Allows quantum algorithms to amplify correct answers and cancel wrong ones
-
-🚀 Why This Matters for Research:
-
-🧬 MEDICAL APPLICATIONS:
-   • Drug Discovery: Simulate molecular interactions with exponential speedup
-   • Protein Folding: Model complex protein structures that classical computers struggle with
-   • CRISPR Optimization: Find optimal gene editing targets much faster
-
-🌌 COSMOLOGY & PHYSICS:
-   • Black Hole Simulations: Model quantum effects near event horizons
-   • Dark Matter Detection: Optimize detector configurations for rare events
-   • Quantum Field Theory: Simulate fundamental particle interactions
-
-🤖 QUANTUM MACHINE LEARNING:
-   • Pattern Recognition: Quantum neural networks for complex data
-   • Optimization: Solve NP-hard problems more efficiently
-   • Financial Modeling: Risk analysis with quantum Monte Carlo methods
-
-📊 Current Reality:
-   • We're in the NISQ era (Noisy Intermediate-Scale Quantum)
-   • Quantum computers have 50-1000 qubits with high error rates
-   • Quantum advantage exists for specific problems, not general computing
-   • Hybrid classical-quantum algorithms show the most promise
-
-🎯 Explore the Tabs:
-   • Each tab demonstrates a specific quantum concept
-   • Run examples to see quantum behavior in action
-   • Compare classical vs quantum approaches
-   • Understand why quantum computers excel at certain problems
-
-Ready to explore the quantum realm? Click through the tabs to see quantum computing in action! 🚀
-        """
-        
-        text_edit.setHtml(content.replace('\n', '<br>'))
+    <h3>🎯 Explore the Tabs:</h3>
+    <ul>
+        <li><b>NISQ Algorithms</b>: Discover algorithms like VQE and QAOA that
+        are at the forefront of quantum research.</li>
+        <li><b>Hardware-Ready Demos</b>: Run the most basic quantum circuits,
+        like Bell states, to verify the fundamental principles of quantum
+        mechanics on a real device.</li>
+    </ul>
+    <p>Ready to explore the quantum realm? Click through the tabs to see these
+    algorithms in action! 🚀</p>
+</div>
+        '''
+        text_edit.setHtml(content)
         layout.addWidget(text_edit)
-    
-    def create_superposition_tab(self):
-        """Superposition demonstration"""
+
+    def create_nisq_algorithms_tab(self):
         widget = QWidget()
-        self.tab_widget.addTab(widget, "🌊 Superposition")
-        
-        layout = QHBoxLayout(widget)
-        
-        # Create splitter for description and demo
+        self.tab_widget.addTab(widget, "🔬 NISQ Algorithms")
+        main_layout = QHBoxLayout(widget)
         splitter = QSplitter(Qt.Horizontal)
-        layout.addWidget(splitter)
-        
-        # Description panel
+        main_layout.addWidget(splitter)
+
         desc_widget = QWidget()
         desc_layout = QVBoxLayout(desc_widget)
-        
+        desc_label = QLabel("🔬 NISQ-Era Quantum Algorithms")
+        desc_label.setFont(QFont("Arial", 16, QFont.Bold))
+        desc_layout.addWidget(desc_label)
         desc_text = QTextEdit()
         desc_text.setReadOnly(True)
         desc_text.setFont(QFont("Arial", 10))
-        desc_text.setMaximumWidth(400)
-        
-        superposition_desc = """
-🌊 QUANTUM SUPERPOSITION
+        nisq_desc = """
+🎯 WHAT IS NISQ?
 
-What is it?
-Superposition allows a qubit to exist in multiple states simultaneously until measured. It's like a coin spinning in the air - both heads and tails at once.
+NISQ = Noisy Intermediate-Scale Quantum
+• Current quantum computers (50-1000 qubits)
+• High error rates, limited gate depth
+• No error correction yet
+• Hybrid classical-quantum algorithms
 
-🔬 The Science:
-• A qubit can be |0⟩, |1⟩, or any combination: α|0⟩ + β|1⟩
-• |α|² + |β|² = 1 (probabilities must sum to 1)
-• When measured, the qubit "collapses" to either 0 or 1
+🚀 NISQ-OPTIMIZED ALGORITHMS:
 
-🚀 Why It's Powerful:
-• Classical bit: Can check one solution at a time
-• Quantum qubit: Can explore multiple solutions simultaneously
-• n qubits = 2ⁿ possible states explored at once!
+1. 🎲 QUANTUM RANDOM NUMBER GENERATOR
+   • True quantum randomness from superposition
+   • Perfect for cryptography and simulations
 
-🎯 Real-World Applications:
+2. ⚛️ VARIATIONAL QUANTUM EIGENSOLVER (VQE)
+   • Find ground state energies of molecules
+   • Hybrid optimization approach
 
-🧬 Drug Discovery:
-• Classical: Test each molecular configuration individually
-• Quantum: Explore all configurations in superposition
-• Result: Exponentially faster drug screening
+3. 🔀 QUANTUM APPROXIMATE OPTIMIZATION (QAOA)
+   • Solve combinatorial optimization problems
+   • Max-Cut, traveling salesman, etc.
 
-🔐 Cryptography:
-• Quantum key distribution uses superposition
-• Any eavesdropping collapses the quantum state
-• Provides mathematically proven security
+🔧 WHY THESE WORK ON NISQ DEVICES:
+• Shallow circuits (low gate depth)
+• Minimal qubits (2-10 typically)
+• Noise-tolerant algorithms
 
-🎲 Random Number Generation:
-• Classical: Pseudo-random (deterministic algorithms)
-• Quantum: True randomness from measurement collapse
-• Critical for cryptography and simulations
-
-📊 The Demo:
-Click "Create Superposition" to see a qubit in equal superposition of |0⟩ and |1⟩. The visualization shows the qubit's state. When you measure it multiple times, you'll see the probabilistic nature of quantum mechanics!
+💡 Try the interactive demos to see these algorithms in action!
         """
-        
-        desc_text.setPlainText(superposition_desc)
+        desc_text.setPlainText(nisq_desc)
         desc_layout.addWidget(desc_text)
         splitter.addWidget(desc_widget)
-        
-        # Demo panel
+
         demo_widget = QWidget()
         demo_layout = QVBoxLayout(demo_widget)
-        
-        # Controls
-        control_layout = QHBoxLayout()
-        
-        create_btn = QPushButton("Create Superposition")
-        create_btn.clicked.connect(self.demo_superposition)
-        create_btn.setStyleSheet("background-color: lightblue; color: black;")
-        control_layout.addWidget(create_btn)
-        
-        measure_btn = QPushButton("Measure 1000 Times")
-        measure_btn.clicked.connect(self.measure_superposition)
-        measure_btn.setStyleSheet("background-color: lightgreen; color: black;")
-        control_layout.addWidget(measure_btn)
-        
-        control_layout.addStretch()
+        control_layout = QVBoxLayout()
+
+        rng_btn = QPushButton("🎲 Quantum Random Numbers")
+        rng_btn.clicked.connect(self.demo_quantum_rng)
+        control_layout.addWidget(rng_btn)
+
+        vqe_btn = QPushButton("⚛️ VQE for H2 Molecule")
+        vqe_btn.clicked.connect(self.demo_vqe)
+        control_layout.addWidget(vqe_btn)
+
+        qaoa_btn = QPushButton("🔀 QAOA Optimization")
+        qaoa_btn.clicked.connect(self.demo_qaoa)
+        control_layout.addWidget(qaoa_btn)
+
         demo_layout.addLayout(control_layout)
-        
-        # Results display
-        self.superposition_results = QTextEdit()
-        self.superposition_results.setFont(QFont("Courier", 10))
-        self.superposition_results.setMaximumHeight(200)
-        demo_layout.addWidget(self.superposition_results)
-        
-        # Matplotlib figure
-        self.superposition_figure = Figure(figsize=(12, 6))
-        self.superposition_canvas = FigureCanvas(self.superposition_figure)
-        demo_layout.addWidget(self.superposition_canvas)
-        
+
+        self.nisq_results = QTextEdit()
+        self.nisq_results.setFont(QFont("Courier", 9))
+        self.nisq_results.setReadOnly(True)
+        demo_layout.addWidget(self.nisq_results)
+
+        self.nisq_figure = Figure(figsize=(10, 6))
+        self.nisq_canvas = FigureCanvas(self.nisq_figure)
+        demo_layout.addWidget(self.nisq_canvas)
+
         splitter.addWidget(demo_widget)
         splitter.setSizes([400, 800])
-    
-    def demo_superposition(self):
-        """Demonstrate quantum superposition"""
+
+    def create_hardware_ready_tab(self):
+        widget = QWidget()
+        self.tab_widget.addTab(widget, "🚀 Hardware-Ready Demos")
+        main_layout = QHBoxLayout(widget)
+        splitter = QSplitter(Qt.Horizontal)
+        main_layout.addWidget(splitter)
+
+        desc_widget = QWidget()
+        desc_layout = QVBoxLayout(desc_widget)
+        desc_label = QLabel("🚀 Hardware-Ready Demos")
+        desc_label.setFont(QFont("Arial", 16, QFont.Bold))
+        desc_layout.addWidget(desc_label)
+        desc_text = QTextEdit()
+        desc_text.setReadOnly(True)
+        desc_text.setFont(QFont("Arial", 10))
+        hardware_desc = """
+🎯 WHAT ARE HARDWARE-READY DEMOS?
+
+These are the simplest, most fundamental quantum circuits. They are perfect for testing a real quantum computer's capabilities.
+
+✅ Key Features:
+• Minimal Qubits (1-3)
+• Minimal Depth (1-2 gates)
+• Demonstrates core quantum phenomena
+
+🚀 THE DEMOS:
+
+1. 🌊 SINGLE QUBIT SUPERPOSITION
+   • The "Hello, World!" of quantum computing
+   • Puts a single qubit into a 50/50 state of 0 and 1
+
+2. 🔗 BELL STATE (ENTANGLEMENT)
+   • Creates a mysterious link between two qubits
+   • Measuring one instantly affects the other
+
+3. 🌍 GHZ STATE (3-QUBIT ENTANGLEMENT)
+   • Entangles three qubits into a single state
+   • Used in quantum error correction and networking
+
+💡 Try the interactive demos to create and measure these fundamental quantum states!
+        """
+        desc_text.setPlainText(hardware_desc)
+        desc_layout.addWidget(desc_text)
+        splitter.addWidget(desc_widget)
+
+        demo_widget = QWidget()
+        demo_layout = QVBoxLayout(demo_widget)
+        control_layout = QVBoxLayout()
+
+        superposition_btn = QPushButton("🌊 Single Qubit Superposition")
+        superposition_btn.clicked.connect(self.demo_single_qubit_superposition)
+        control_layout.addWidget(superposition_btn)
+
+        bell_state_btn = QPushButton("🔗 Bell State (Entanglement)")
+        bell_state_btn.clicked.connect(self.demo_bell_state)
+        control_layout.addWidget(bell_state_btn)
+
+        ghz_state_btn = QPushButton("🌍 GHZ State (3-Qubit Entanglement)")
+        ghz_state_btn.clicked.connect(self.demo_ghz_state)
+        control_layout.addWidget(ghz_state_btn)
+
+        demo_layout.addLayout(control_layout)
+
+        self.hardware_results = QTextEdit()
+        self.hardware_results.setFont(QFont("Courier", 10))
+        self.hardware_results.setReadOnly(True)
+        demo_layout.addWidget(self.hardware_results)
+
+        self.hardware_figure = Figure(figsize=(12, 6))
+        self.hardware_canvas = FigureCanvas(self.hardware_figure)
+        demo_layout.addWidget(self.hardware_canvas)
+
+        splitter.addWidget(demo_widget)
+        splitter.setSizes([450, 750])
+
+    def _run_demo(self, circuit_func, name, results_widget, figure, canvas):
         try:
-            # Create a qubit in superposition
-            qc = QuantumCircuit(1, 1)
-            qc.h(0)  # Hadamard gate creates superposition
-            
-            # Get the statevector
-            statevector = Statevector.from_instruction(qc)
-            
-            # Clear previous plots
-            self.superposition_figure.clear()
-            ax1 = self.superposition_figure.add_subplot(1, 2, 1)
-            ax2 = self.superposition_figure.add_subplot(1, 2, 2)
-            
-            # Plot circuit
-            qc.draw(output='mpl', ax=ax1)
-            ax1.set_title("Quantum Circuit: H|0⟩ = (|0⟩ + |1⟩)/√2")
-            
-            # Plot probabilities
-            probs = statevector.probabilities()
-            ax2.bar(['|0⟩', '|1⟩'], probs, color=['blue', 'red'])
-            ax2.set_title("State Probabilities")
-            ax2.set_ylabel("Probability")
-            ax2.set_ylim(0, 1)
-            
-            self.superposition_canvas.draw()
-            
-            self.superposition_results.clear()
-            self.superposition_results.append(
-                f"✅ Superposition Created!\n"
-                f"State: {statevector}\n"
-                f"Probabilities: |0⟩: 50%, |1⟩: 50%\n"
-                f"The qubit is now in equal superposition!\n\n"
-                f"🔬 What's happening:\n"
-                f"• The Hadamard gate (H) puts the qubit in superposition\n"
-                f"• Before measurement, it's both |0⟩ AND |1⟩\n"
-                f"• Each measurement has 50% chance of either outcome\n"
-                f"• Click 'Measure 1000 Times' to see the statistics!")
-            
+            qc, counts, description = circuit_func()
+
+            results_widget.clear()
+            results_widget.append(f"🚀 RUNNING: {name}\n")
+            results_widget.append(f"{description}\n")
+            results_widget.append("📊 Measurement Results (1024 shots):")
+
+            sorted_counts = sorted(counts.items())
+            for outcome, count in sorted_counts:
+                percentage = (count / 1024) * 100
+                clean_outcome = outcome.replace(" ", "")
+                results_widget.append(f"  |{clean_outcome}⟩: {count} times ({percentage:.1f}%)")
+
+            figure.clear()
+            ax1 = figure.add_subplot(1, 2, 1)
+            plot_histogram(counts, ax=ax1, title="Measurement Outcomes")
+
+            ax2 = figure.add_subplot(1, 2, 2)
+            qc.draw(output='mpl', ax=ax2)
+            ax2.set_title("Quantum Circuit")
+
+            canvas.draw()
+
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Could not create superposition: {e}")
-    
-    def measure_superposition(self):
-        """Measure the superposition many times"""
-        try:
-            # Create and measure the circuit many times
-            qc = QuantumCircuit(1, 1)
-            qc.h(0)
-            qc.measure(0, 0)
-            
-            # Run many shots
-            compiled_circuit = transpile(qc, self.simulator)
-            job = self.simulator.run(compiled_circuit, shots=1000)
-            result = job.result()
-            counts = result.get_counts()
-            
-            # Update results
-            self.superposition_results.append(
-                f"\n📊 Measurement Results (1000 shots):\n")
-            for outcome, count in counts.items():
-                percentage = (count/1000) * 100
-                self.superposition_results.append(
-                    f"  |{outcome}⟩: {count} times ({percentage:.1f}%)\n")
-            
-            self.superposition_results.append(
-                f"\n🎯 Notice: Results are close to 50/50!\n"
-                f"This proves the qubit was in true superposition.\n"
-                f"Classical randomness would give the same statistics,\n"
-                f"but quantum superposition explores BOTH states simultaneously!\n")
-            
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Could not measure superposition: {e}")
-    
-    def create_entanglement_tab(self):
-        """Quantum entanglement demonstration"""
-        widget = QWidget()
-        self.tab_widget.addTab(widget, "🔗 Entanglement")
-        
-        layout = QVBoxLayout(widget)
-        label = QLabel("Entanglement demonstration coming soon...")
-        label.setAlignment(Qt.AlignCenter)
-        label.setFont(QFont("Arial", 16))
-        layout.addWidget(label)
-    
-    def create_interference_tab(self):
-        """Quantum interference demonstration"""
-        widget = QWidget()
-        self.tab_widget.addTab(widget, "🌀 Interference")
-        
-        layout = QVBoxLayout(widget)
-        label = QLabel("Interference demonstration coming soon...")
-        label.setAlignment(Qt.AlignCenter)
-        label.setFont(QFont("Arial", 16))
-        layout.addWidget(label)
-    
-    def create_quantum_algorithms_tab(self):
-        """Quantum algorithms overview"""
-        widget = QWidget()
-        self.tab_widget.addTab(widget, "🧮 Algorithms")
-        
-        layout = QVBoxLayout(widget)
-        
-        text_edit = QTextEdit()
-        text_edit.setReadOnly(True)
-        text_edit.setFont(QFont("Arial", 11))
-        
-        algorithms_content = """
-🧮 QUANTUM ALGORITHMS SHOWCASE
+            QMessageBox.critical(self, "Error", f"Could not run demo '{name}': {e}")
 
-This tab demonstrates the most important quantum algorithms and their real-world applications.
+    def demo_quantum_rng(self):
+        _, qc, counts, desc = self.nisq_examples.quantum_random_number_generator()
+        self._display_nisq_results("Quantum Random Number Generator", qc, counts, desc)
 
-🔍 GROVER'S SEARCH ALGORITHM
-• Problem: Search unsorted database of N items
-• Classical: O(N) time - must check every item
-• Quantum: O(√N) time - quadratic speedup!
-• Applications:
-  🔐 Breaking symmetric cryptography
-  🧬 Database search in bioinformatics
-  🎯 Optimization problems
-  💰 Portfolio optimization
+    def demo_vqe(self):
+        qc, result, desc = self.nisq_examples.vqe_h2_molecule()
+        self._display_nisq_results("VQE for H2", qc, result, desc)
 
-⚗️ QUANTUM SIMULATION ALGORITHMS
-• Problem: Simulate quantum systems (molecules, materials)
-• Classical: Exponentially hard (2^n states)
-• Quantum: Natural fit - quantum simulates quantum!
-• Applications:
-  💊 Drug discovery and design
-  🔋 Battery materials optimization
-  🧪 Catalyst development
-  ⚡ Superconductor research
+    def demo_qaoa(self):
+        qc, result, desc = self.nisq_examples.qaoa_max_cut()
+        self._display_nisq_results("QAOA Max-Cut", qc, result, desc)
 
-🔢 SHOR'S FACTORING ALGORITHM
-• Problem: Factor large integers
-• Classical: Exponential time (breaks down for large numbers)
-• Quantum: Polynomial time - exponential speedup!
-• Impact:
-  🔐 Breaks RSA encryption
-  🏛️ Threatens current cybersecurity
-  🛡️ Motivates quantum-resistant cryptography
+    def _display_nisq_results(self, name, qc, result, description):
+        self.nisq_results.clear()
+        self.nisq_results.append(f"🚀 {name}\n")
+        self.nisq_results.append(f"{description}\n")
+        self.nisq_results.append("📊 Results:")
+        self.nisq_results.append(str(result))
 
-🎯 VARIATIONAL QUANTUM ALGORITHMS (VQE, QAOA)
-• Hybrid classical-quantum approach
-• Good for NISQ devices (current quantum computers)
-• Applications:
-  🧬 Protein folding optimization
-  🚗 Route optimization
-  📈 Financial portfolio optimization
-  🔋 Energy system optimization
+        self.nisq_figure.clear()
+        ax = self.nisq_figure.add_subplot(111)
+        qc.draw(output='mpl', ax=ax)
+        self.nisq_canvas.draw()
 
-🤖 QUANTUM MACHINE LEARNING
-• Quantum Neural Networks
-• Quantum Support Vector Machines
-• Quantum Feature Maps
-• Applications:
-  🏥 Medical diagnosis
-  🔬 Drug discovery
-  📊 Pattern recognition
-  🎯 Optimization
+    def demo_single_qubit_superposition(self):
+        qc, counts, desc = self.hardware_demos.single_qubit_superposition()
+        self._display_hardware_results("Single Qubit Superposition", qc, counts, desc)
 
-📊 CURRENT STATUS:
-• Most algorithms show theoretical advantage
-• Practical advantage limited by current hardware
-• NISQ algorithms (VQE, QAOA) most promising near-term
-• Fault-tolerant quantum computers needed for full advantage
+    def demo_bell_state(self):
+        qc, counts, desc = self.hardware_demos.create_bell_state()
+        self._display_hardware_results("Bell State", qc, counts, desc)
 
-🚀 FUTURE OUTLOOK:
-As quantum computers scale up:
-• Exponential advantages will become practical
-• New algorithms continue to be discovered
-• Hybrid approaches bridge classical and quantum
-• Industry applications will transform multiple fields
+    def demo_ghz_state(self):
+        qc, counts, desc = self.hardware_demos.create_ghz_state()
+        self._display_hardware_results("GHZ State", qc, counts, desc)
 
-Each algorithm leverages quantum phenomena (superposition, entanglement, interference) in unique ways to achieve computational advantages impossible classically.
-        """
-        
-        text_edit.setPlainText(algorithms_content)
-        layout.addWidget(text_edit)
-    
-    def create_quantum_ml_tab(self):
-        """Quantum machine learning applications"""
-        widget = QWidget()
-        self.tab_widget.addTab(widget, "🤖 Quantum ML")
-        
-        layout = QVBoxLayout(widget)
-        
-        text_edit = QTextEdit()
-        text_edit.setReadOnly(True)
-        text_edit.setFont(QFont("Arial", 11))
-        
-        ml_content = """
-🤖 QUANTUM MACHINE LEARNING
+    def _display_hardware_results(self, name, qc, counts, description):
+        self.hardware_results.clear()
+        self.hardware_results.append(f"🚀 {name}\n")
+        self.hardware_results.append(f"{description}\n")
+        self.hardware_results.append("📊 Measurement Results:")
 
-Quantum computing promises to revolutionize machine learning through quantum-enhanced algorithms that could provide exponential speedups for certain problems.
+        sorted_counts = sorted(counts.items())
+        for outcome, count in sorted_counts:
+            percentage = (sum(counts.values()) / 100)
+            self.hardware_results.append(f"  |{outcome}⟩: {count} times ({count/percentage:.1f}%)")
 
-[Content continues with detailed explanations of quantum ML concepts...]
-        """
-        
-        text_edit.setPlainText(ml_content)
-        layout.addWidget(text_edit)
-    
-    def create_medical_applications_tab(self):
-        """Medical and biological applications"""
-        widget = QWidget()
-        self.tab_widget.addTab(widget, "🧬 Medical Apps")
-        
-        layout = QVBoxLayout(widget)
-        
-        text_edit = QTextEdit()
-        text_edit.setReadOnly(True)
-        text_edit.setFont(QFont("Arial", 11))
-        
-        medical_content = """
-🧬 QUANTUM COMPUTING IN MEDICINE
+        self.hardware_figure.clear()
+        ax1 = self.hardware_figure.add_subplot(1, 2, 1)
+        plot_histogram(counts, ax=ax1, title="Outcomes")
+        ax2 = self.hardware_figure.add_subplot(1, 2, 2)
+        qc.draw(output='mpl', ax=ax2)
+        ax2.set_title("Circuit")
+        self.hardware_canvas.draw()
 
-Quantum computing promises to revolutionize healthcare through unprecedented computational power for biological systems.
-
-[Content continues with detailed medical applications...]
-        """
-        
-        text_edit.setPlainText(medical_content)
-        layout.addWidget(text_edit)
-    
-    def create_cosmology_tab(self):
-        """Cosmology and physics applications"""
-        widget = QWidget()
-        self.tab_widget.addTab(widget, "🌌 Cosmology")
-        
-        layout = QVBoxLayout(widget)
-        
-        text_edit = QTextEdit()
-        text_edit.setReadOnly(True)
-        text_edit.setFont(QFont("Arial", 11))
-        
-        cosmo_content = """
-🌌 QUANTUM COMPUTING IN COSMOLOGY
-
-Quantum computing opens new frontiers in understanding the universe, from black holes to dark matter to the fundamental nature of reality itself.
-
-[Content continues with detailed cosmology applications...]
-        """
-        
-        text_edit.setPlainText(cosmo_content)
-        layout.addWidget(text_edit)
 
 def main():
-    """Main function to run the Quantum Explorer GUI"""
+    """Main function to launch the Quantum Explorer GUI"""
     app = QApplication(sys.argv)
-    app.setApplicationName("Quantum Computing Explorer")
-    app.setApplicationVersion("1.0")
-    
-    # Set application style
-    app.setStyle('Fusion')
-    
-    # Create and show the main window
-    window = QuantumExplorerGUI()
-    window.show()
-    
-    # Handle closing gracefully
-    def cleanup():
-        plt.close('all')  # Close all matplotlib figures
-    
-    app.aboutToQuit.connect(cleanup)
-    
-    # Run the application
-    sys.exit(app.exec_())
+    explorer = QuantumExplorerGUI()
+    explorer.show()
+    return app.exec_()
 
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    sys.exit(main())
