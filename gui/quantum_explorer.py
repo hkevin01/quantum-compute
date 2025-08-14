@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
 """
-Quantum Hardware Explorer GUI
+Quantum Hardware Explorer GUI (hardware-only)
 
-Minimal GUI that runs simple, hardware-ready quantum circuits on real devices
-via Qiskit IBM Runtime. Only returns results from actual quantum computers.
+Minimal PyQt5 app that runs shallow circuits on IBM Quantum hardware
+via Qiskit IBM Runtime (Sampler). Only real-device results are shown.
 """
 
 import sys
+from typing import Optional
 
 import matplotlib
 
-# Use QtAgg backend for PyQt5 before importing other matplotlib modules
+# Select QtAgg for PyQt5 before importing Matplotlib UI modules
 matplotlib.use("QtAgg")
 
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
+from matplotlib.backends import backend_qtagg as _bqtagg  # noqa: E402
+from matplotlib.figure import Figure  # noqa: E402
+
+FigureCanvas = _bqtagg.FigureCanvasQTAgg
 
 try:
     from PyQt5.QtCore import Qt
@@ -42,7 +45,10 @@ try:
     from qiskit_ibm_runtime import QiskitRuntimeService, Sampler, Session
 except ImportError as e:
     print(f"Qiskit modules missing: {e}")
-    print("Install with: pip install qiskit qiskit-ibm-runtime matplotlib PyQt5 pylatexenc")
+    print(
+        "Install with: pip install qiskit qiskit-ibm-runtime "
+        "matplotlib PyQt5 pylatexenc"
+    )
     sys.exit(1)
 
 
@@ -52,190 +58,195 @@ class QuantumExplorerGUI(QMainWindow):
         self.setWindowTitle("Quantum Hardware Explorer")
         self.setGeometry(100, 100, 1200, 800)
 
-        # IBM Runtime service (initialized on first use)
-        self.service = None
+        # Lazy IBM Runtime service
+        self.service: Optional[QiskitRuntimeService] = None
 
-        main_widget = QWidget()
-        self.setCentralWidget(main_widget)
-        main_layout = QVBoxLayout(main_widget)
+        # Predeclare widgets for type checkers
+        self.results: Optional[QTextEdit] = None
+        self.fig: Optional[Figure] = None
+        self.canvas: Optional[FigureCanvas] = None
 
-        self.tab_widget = QTabWidget()
-        main_layout.addWidget(self.tab_widget)
+        root = QWidget()
+        self.setCentralWidget(root)
+        layout = QVBoxLayout(root)
 
-        self.create_introduction_tab()
-        self.create_hardware_ready_tab()
+        self.tabs = QTabWidget()
+        layout.addWidget(self.tabs)
 
-        self.setStyleSheet(
-            """
-            QMainWindow { background-color: #f0f0f0; }
-            QTabWidget::pane { border: 1px solid #cccccc; background-color: white; }
-            QTabWidget::tab-bar { alignment: left; }
-            QTabBar::tab { background-color: #e0e0e0; padding: 8px 16px; margin-right: 2px; border-top-left-radius: 4px; border-top-right-radius: 4px; }
-            QTabBar::tab:selected { background-color: white; border-bottom: 2px solid #007acc; }
-            QPushButton { background-color: #007acc; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; }
-            QPushButton:hover { background-color: #005a9f; }
-            QPushButton:pressed { background-color: #004080; }
-            """
+        self._apply_styles()
+        self._init_tab_intro()
+        self._init_tab_hardware()
+
+    def _apply_styles(self) -> None:
+        css = (
+            "QMainWindow { background-color: #f7f7f7; }\n"
+            "QTabWidget::pane { border: 1px solid #ccc; background-color: "
+            "#fff; }\n"
+            "QTabWidget::tab-bar { alignment: left; }\n"
+            "QTabBar::tab { background-color: #e8e8e8; padding: 6px 12px; "
+            "margin-right: 2px; border-top-left-radius: 4px; "
+            "border-top-right-radius: 4px; }\n"
+            "QTabBar::tab:selected { background-color: #fff; border-bottom: "
+            "2px solid #007acc; }\n"
+            "QPushButton { background-color: #007acc; color: #fff; border: "
+            "none; padding: 8px 14px; border-radius: 4px; font-weight: "
+            "600; }\n"
+            "QPushButton:hover { background-color: #0062b8; }\n"
+            "QPushButton:pressed { background-color: #004f94; }\n"
         )
+        self.setStyleSheet(css)
 
-    def create_introduction_tab(self) -> None:
-        widget = QWidget()
-        self.tab_widget.addTab(widget, "🚀 Introduction")
-        layout = QVBoxLayout(widget)
-        text_edit = QTextEdit()
-        text_edit.setReadOnly(True)
-        text_edit.setFont(QFont("Arial", 11))
-        content = '''
-<div style="font-family: Arial; font-size: 11pt;">
-  <h2>🌟 Welcome to the Quantum Hardware Demo Explorer!</h2>
-  <p>This app runs <b>real hardware</b> jobs on IBM Quantum using Qiskit Runtime.</p>
-  <h3>🔑 Setup</h3>
-  <p>Set these environment variables before running:</p>
-  <pre>export QISKIT_IBM_TOKEN=your_token
-export QISKIT_IBM_CHANNEL=ibm_quantum
-export QISKIT_IBM_INSTANCE=ibm-q/open/main</pre>
-  <p>Create an account at <a href="https://quantum.ibm.com/">quantum.ibm.com</a>.</p>
-  <h3>🎯 What you can run</h3>
-  <ul>
-    <li>🌊 Single-qubit superposition</li>
-    <li>🔗 Bell state (2-qubit entanglement)</li>
-    <li>🌍 GHZ state (3-qubit entanglement)</li>
-  </ul>
-</div>
-        '''
-        text_edit.setHtml(content)
-        layout.addWidget(text_edit)
+    def _init_tab_intro(self) -> None:
+        w = QWidget()
+        self.tabs.addTab(w, "Introduction")
+        v = QVBoxLayout(w)
 
-    def create_hardware_ready_tab(self) -> None:
-        widget = QWidget()
-        self.tab_widget.addTab(widget, "🚀 Hardware-Ready Demos")
-        main_layout = QHBoxLayout(widget)
-        splitter = QSplitter(Qt.Horizontal)
-        main_layout.addWidget(splitter)
+        t = QTextEdit()
+        t.setReadOnly(True)
+        t.setFont(QFont("Arial", 11))
+        html = (
+            "<div style=\"font-family: Arial; font-size: 11pt;\">\n"
+            "<h2>Welcome to the Quantum Hardware Demo Explorer</h2>\n"
+            "<p>This app submits jobs to <b>real IBM Quantum devices</b> "
+            "using Qiskit Runtime.</p>\n"
+            "<h3>Setup</h3>\n"
+            "<p>Export these variables first:</p>\n"
+            "<pre>export QISKIT_IBM_TOKEN=your_token\n"
+            "export QISKIT_IBM_CHANNEL=ibm_quantum\n"
+            "export QISKIT_IBM_INSTANCE=ibm-q/open/main</pre>\n"
+            "<p>Create an account at <a href=\"https://quantum.ibm.com/\">"
+            "quantum.ibm.com</a>.</p>\n"
+            "</div>\n"
+        )
+        t.setHtml(html)
+        v.addWidget(t)
 
-        # Left: description
-        desc_widget = QWidget()
-        desc_layout = QVBoxLayout(desc_widget)
-        title = QLabel("🚀 Hardware-Ready Demos")
+    def _init_tab_hardware(self) -> None:
+        w = QWidget()
+        self.tabs.addTab(w, "Hardware-Ready Demos")
+        h = QHBoxLayout(w)
+
+        # Left controls
+        left = QWidget()
+        lv = QVBoxLayout(left)
+        title = QLabel("Hardware-Ready Demos")
         title.setFont(QFont("Arial", 16, QFont.Bold))
-        desc_layout.addWidget(title)
+        lv.addWidget(title)
+
         desc = QTextEdit()
         desc.setReadOnly(True)
         desc.setFont(QFont("Arial", 10))
         desc.setPlainText(
-            "Simple, shallow circuits to validate a real quantum device."
+            "Run shallow circuits: superposition, Bell, GHZ on hardware."
         )
-        desc_layout.addWidget(desc)
-        splitter.addWidget(desc_widget)
+        lv.addWidget(desc)
 
-        # Right: controls and results
-        demo_widget = QWidget()
-        demo_layout = QVBoxLayout(demo_widget)
+        b1 = QPushButton("Single Qubit Superposition")
+        b1.clicked.connect(self.run_superposition)
+        lv.addWidget(b1)
 
-        buttons_layout = QVBoxLayout()
+        b2 = QPushButton("Bell State (2 Qubits)")
+        b2.clicked.connect(self.run_bell)
+        lv.addWidget(b2)
 
-        btn_super = QPushButton("🌊 Single Qubit Superposition")
-        btn_super.clicked.connect(self.run_superposition)
-        buttons_layout.addWidget(btn_super)
+        b3 = QPushButton("GHZ State (3 Qubits)")
+        b3.clicked.connect(self.run_ghz)
+        lv.addWidget(b3)
 
-        btn_bell = QPushButton("🔗 Bell State (2 Qubits)")
-        btn_bell.clicked.connect(self.run_bell)
-        buttons_layout.addWidget(btn_bell)
-
-        btn_ghz = QPushButton("🌍 GHZ State (3 Qubits)")
-        btn_ghz.clicked.connect(self.run_ghz)
-        buttons_layout.addWidget(btn_ghz)
-
-        demo_layout.addLayout(buttons_layout)
+        # Right results
+        right = QWidget()
+        rv = QVBoxLayout(right)
 
         self.results = QTextEdit()
-        self.results.setFont(QFont("Courier", 10))
         self.results.setReadOnly(True)
-        demo_layout.addWidget(self.results)
+        self.results.setFont(QFont("Courier New", 10))
+        rv.addWidget(self.results)
 
-        self.figure = Figure(figsize=(12, 6))
-        self.canvas = FigureCanvas(self.figure)
-        demo_layout.addWidget(self.canvas)
+        self.fig = Figure(figsize=(10, 5))
+        self.canvas = FigureCanvas(self.fig)
+        rv.addWidget(self.canvas)
 
-        splitter.addWidget(demo_widget)
-        splitter.setSizes([450, 750])
+        # Splitter
+        splitter = QSplitter(Qt.Horizontal)  # type: ignore[attr-defined]
+        splitter.addWidget(left)
+        splitter.addWidget(right)
+        splitter.setSizes([400, 800])
+        h.addWidget(splitter)
 
-    # ---- IBM Runtime helpers ----
+    # ---------- IBM Runtime helpers ----------
     def _ensure_service(self) -> None:
         if self.service is not None:
             return
         try:
             self.service = QiskitRuntimeService()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             QMessageBox.critical(
                 self,
                 "IBM Runtime Not Configured",
                 "IBM Runtime credentials not found.\n"
-                "Set QISKIT_IBM_TOKEN, QISKIT_IBM_CHANNEL, QISKIT_IBM_INSTANCE and retry.\n\n"
+                "Set QISKIT_IBM_TOKEN, QISKIT_IBM_CHANNEL, "
+                "QISKIT_IBM_INSTANCE and retry.\n\n"
                 f"Original error: {e}",
             )
             raise
 
-    def _select_backend(self, qubits: int):
+    def _pick_backend(self, qubits: int):
         self._ensure_service()
-        candidates = [
-            b for b in self.service.backends()
-            if getattr(b, "num_qubits", 0) >= qubits
-        ]
-        if not candidates:
-            raise RuntimeError("No suitable backends available for required qubit count")
-        # Choose first operational backend
-        for b in candidates:
+        try:
+            assert self.service is not None
+            backends = list(self.service.backends())
+        except Exception:  # noqa: BLE001
+            backends = []
+        cands = [b for b in backends if getattr(b, "num_qubits", 0) >= qubits]
+        if not cands:
+            raise RuntimeError("No suitable backends for required qubit count")
+        for b in cands:
             try:
                 if b.status().operational:
                     return b
-            except Exception:
+            except Exception:  # noqa: BLE001
                 continue
-        return candidates[0]
+        return cands[0]
 
-    def _run_on_hardware(self, qc: QuantumCircuit, shots: int = 1024):
-        backend = self._select_backend(qc.num_qubits)
-        # Use a runtime Session bound to the selected backend; the service was
-        # initialized in _ensure_service(), so default session discovery works.
-        with Session(backend=backend) as session:
-            # Create a Sampler bound to the active session context
-            sampler = Sampler()
-            job = sampler.run([qc], shots=shots)
+    def _run(self, qc: QuantumCircuit, shots: int = 1024):
+        backend = self._pick_backend(qc.num_qubits)
+        with Session(backend=backend):
+            sampler = Sampler(options={"shots": shots})
+            job = sampler.run([qc])
             result = job.result()
-            quasi = result.quasi_dists[0]
-            bitlen = qc.num_clbits or qc.num_qubits
-            counts = {}
-            for k, v in quasi.items():
+        quasi = result.quasi_dists[0]
+        bitlen = qc.num_clbits or qc.num_qubits
+        counts = {}
+        for k, v in quasi.items():
+            try:
+                idx = int(k)
+            except Exception:  # noqa: BLE001
                 try:
-                    idx = int(k)
-                except Exception:
-                    try:
-                        idx = int(k, 2)
-                    except Exception:
-                        continue
-                key = format(idx, f"0{bitlen}b")
-                counts[key] = int(round(v * shots))
-            # Resolve backend name robustly across versions
-            backend_name = getattr(backend, "name", None)
-            if callable(backend_name):
-                backend_name = backend_name()
-            if not isinstance(backend_name, str):
-                backend_name = getattr(backend, "backend_name", "backend")
-            return counts, backend_name
+                    idx = int(k, 2)
+                except Exception:  # noqa: BLE001
+                    continue
+            key = format(idx, f"0{bitlen}b")
+            counts[key] = int(round(float(v) * shots))
 
-    # ---- Demos ----
+        name = getattr(backend, "name", None)
+        backend_name = name() if callable(name) else name
+        if not isinstance(backend_name, str):
+            backend_name = getattr(backend, "backend_name", "backend")
+        return counts, backend_name
+
+    # ---------- Demo actions ----------
     def run_superposition(self) -> None:
         qc = QuantumCircuit(1, 1)
         qc.h(0)
         qc.measure(0, 0)
-        self._execute_and_display("Single Qubit Superposition", qc)
+        self._execute("Single Qubit Superposition", qc)
 
     def run_bell(self) -> None:
         qc = QuantumCircuit(2, 2)
         qc.h(0)
         qc.cx(0, 1)
         qc.measure([0, 1], [0, 1])
-        self._execute_and_display("Bell State", qc)
+        self._execute("Bell State", qc)
 
     def run_ghz(self) -> None:
         qc = QuantumCircuit(3, 3)
@@ -243,28 +254,32 @@ export QISKIT_IBM_INSTANCE=ibm-q/open/main</pre>
         qc.cx(0, 1)
         qc.cx(1, 2)
         qc.measure([0, 1, 2], [0, 1, 2])
-        self._execute_and_display("GHZ State", qc)
+        self._execute("GHZ State", qc)
 
-    def _execute_and_display(self, name: str, qc: QuantumCircuit) -> None:
+    def _execute(self, title: str, qc: QuantumCircuit) -> None:
         try:
-            counts, backend_name = self._run_on_hardware(qc)
-        except Exception as e:
+            counts, backend_name = self._run(qc)
+        except Exception as e:  # noqa: BLE001
             QMessageBox.critical(self, "Hardware Run Failed", str(e))
             return
 
-        self.results.clear()
-        self.results.append(f"🚀 {name}\n")
-        self.results.append(f"Backend: {backend_name}\n")
-        self.results.append("📊 Measurement Results:\n")
-        total = max(1, sum(counts.values()))
-        for outcome, count in sorted(counts.items()):
-            pct = (count / total) * 100.0
-            self.results.append(f"  |{outcome}⟩: {count} ({pct:.1f}%)")
+        assert self.results is not None
+        assert self.fig is not None
+        assert self.canvas is not None
 
-        self.figure.clear()
-        ax1 = self.figure.add_subplot(1, 2, 1)
+        self.results.clear()
+        self.results.append(f"Job: {title}\n")
+        self.results.append(f"Backend: {backend_name}\n")
+        self.results.append("Results:\n")
+        total = max(1, sum(counts.values()))
+        for bit, cnt in sorted(counts.items()):
+            pct = 100.0 * cnt / total
+            self.results.append(f"  |{bit}⟩: {cnt} ({pct:.1f}%)")
+
+        self.fig.clear()
+        ax1 = self.fig.add_subplot(1, 2, 1)
         plot_histogram(counts, ax=ax1, title="Outcomes")
-        ax2 = self.figure.add_subplot(1, 2, 2)
+        ax2 = self.fig.add_subplot(1, 2, 2)
         qc.draw(output="mpl", ax=ax2)
         ax2.set_title("Circuit")
         self.canvas.draw()
@@ -272,8 +287,8 @@ export QISKIT_IBM_INSTANCE=ibm-q/open/main</pre>
 
 def main() -> int:
     app = QApplication(sys.argv)
-    explorer = QuantumExplorerGUI()
-    explorer.show()
+    win = QuantumExplorerGUI()
+    win.show()
     return app.exec_()
 
 

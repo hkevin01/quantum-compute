@@ -59,7 +59,7 @@ check_python() {
     elif command_exists python; then
         PYTHON_CMD="python"
     else
-        print_error "Python is not installed. Please install Python 3.7+ first."
+    print_error "Python is not installed. Please install Python 3.10+ first."
         exit 1
     fi
     
@@ -68,8 +68,8 @@ check_python() {
     PYTHON_MAJOR=$(echo $PYTHON_VERSION | cut -d'.' -f1)
     PYTHON_MINOR=$(echo $PYTHON_VERSION | cut -d'.' -f2)
     
-    if [ "$PYTHON_MAJOR" -lt 3 ] || ([ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 7 ]); then
-        print_error "Python 3.7+ is required. Found version $PYTHON_VERSION"
+    if [ "$PYTHON_MAJOR" -lt 3 ] || ([ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 10 ]); then
+        print_error "Python 3.10+ is required. Found version $PYTHON_VERSION"
         exit 1
     fi
     
@@ -115,13 +115,13 @@ install_dependencies() {
                 print_info "Some optional packages may not be available"
             else
                 print_warning "Falling back to manual installation..."
-                pip install PyQt5 qiskit qiskit-aer matplotlib numpy pylatexenc
+                pip install PyQt5 qiskit qiskit-ibm-runtime matplotlib numpy pylatexenc
                 print_success "Essential dependencies installed"
             fi
         fi
     else
         print_warning "requirements.txt not found. Installing core dependencies..."
-        pip install PyQt5 qiskit qiskit-aer matplotlib numpy scipy pylatexenc
+        pip install PyQt5 qiskit qiskit-ibm-runtime matplotlib numpy scipy pylatexenc
         print_success "Core dependencies installed"
     fi
 }
@@ -143,6 +143,10 @@ launch_gui() {
     print_step "Launching Quantum Computing Explorer GUI..."
     
     if [ -f "launch_gui.py" ]; then
+        # Ensure IBM Runtime environment variables are set
+        if [ -z "$QISKIT_IBM_TOKEN" ] || [ -z "$QISKIT_IBM_CHANNEL" ] || [ -z "$QISKIT_IBM_INSTANCE" ]; then
+            print_warning "IBM Runtime env vars missing. Set QISKIT_IBM_TOKEN, QISKIT_IBM_CHANNEL, QISKIT_IBM_INSTANCE before running."
+        fi
         $PYTHON_CMD launch_gui.py
     else
         print_error "launch_gui.py not found!"
@@ -168,20 +172,14 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  gui          Launch the PyQt5 GUI (default)"
-    echo "  demos        Run interactive command-line demonstrations"
-    echo "  test         Run quantum computing tests"
     echo "  setup        Set up environment and install dependencies only"
     echo "  clean        Remove virtual environment"
-    echo "  examples     Run basic quantum examples"
-    echo "  nisq         Run NISQ-optimized quantum algorithms"
-    echo "  hardware     Run hardware-ready quantum demos"
+    echo "  hardware     Run hardware-ready quantum demos (examples)"
     echo "  help         Show this help message"
     echo ""
     echo "Examples:"
     echo "  ./run.sh              # Launch GUI (default)"
     echo "  ./run.sh gui          # Launch GUI explicitly"
-    echo "  ./run.sh demos        # Run interactive demos"
-    echo "  ./run.sh nisq         # Run NISQ algorithms"
     echo "  ./run.sh hardware     # Run hardware-ready demos"
     echo "  ./run.sh test         # Run tests"
     echo "  ./run.sh setup        # Setup only"
@@ -247,47 +245,11 @@ main() {
             install_dependencies
             launch_gui
             ;;
-        "demos")
-            check_python
-            setup_venv
-            install_dependencies
-            run_demos
-            ;;
-        "test")
-            check_python
-            setup_venv
-            install_dependencies
-            run_tests
-            ;;
         "setup")
             check_python
             setup_venv
             install_dependencies
             print_success "Environment setup complete!"
-            ;;
-        "examples")
-            check_python
-            setup_venv
-            install_dependencies
-            run_basic_examples
-            ;;
-        "nisq")
-            check_python
-            setup_venv
-            install_dependencies
-            run_nisq
-            ;;
-        "hardware")
-            check_python
-            setup_venv
-            install_dependencies
-            run_hardware
-            ;;
-        "nisq")
-            check_python
-            setup_venv
-            install_dependencies
-            run_nisq
             ;;
         "hardware")
             check_python
