@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
-Quantum Hardware Explorer GUI.
+Quantum Hardware Explorer GUI
 
-An interactive GUI for exploring quantum algorithms designed for real hardware.
+Minimal GUI that runs simple, hardware-ready quantum circuits on real devices
+via Qiskit IBM Runtime. Only returns results from actual quantum computers.
 """
 
-import os
 import sys
 
 import matplotlib
 
-# Set the backend before importing other matplotlib modules
-matplotlib.use('Qt5Agg')
+# Use QtAgg backend for PyQt5 before importing other matplotlib modules
+matplotlib.use("QtAgg")
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 try:
@@ -36,30 +36,24 @@ except ImportError:
     print("PyQt5 not found. Install with: pip install PyQt5")
     sys.exit(1)
 
-# Add the examples directory to the path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'examples'))
-
 try:
-    # Import the hardware-ready and NISQ example modules
-    import hardware_ready_demo
-    import nisq_examples
+    from qiskit import QuantumCircuit
     from qiskit.visualization import plot_histogram
-    from qiskit_aer import AerSimulator
+    from qiskit_ibm_runtime import QiskitRuntimeService, Sampler, Session
 except ImportError as e:
-    print(f"Warning: Could not import quantum modules: {e}")
-    print("Make sure Qiskit is installed: pip install qiskit qiskit-aer")
+    print(f"Qiskit modules missing: {e}")
+    print("Install with: pip install qiskit qiskit-ibm-runtime matplotlib PyQt5 pylatexenc")
     sys.exit(1)
 
 
 class QuantumExplorerGUI(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Quantum Hardware Explorer")
         self.setGeometry(100, 100, 1200, 800)
 
-        self.simulator = AerSimulator()
-        self.nisq_examples = nisq_examples.NISQQuantumExamples()
-        self.hardware_demos = hardware_ready_demo.HardwareReadyQuantumDemos()
+        # IBM Runtime service (initialized on first use)
+        self.service = None
 
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
@@ -69,10 +63,10 @@ class QuantumExplorerGUI(QMainWindow):
         main_layout.addWidget(self.tab_widget)
 
         self.create_introduction_tab()
-        self.create_nisq_algorithms_tab()
         self.create_hardware_ready_tab()
 
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QMainWindow { background-color: #f0f0f0; }
             QTabWidget::pane { border: 1px solid #cccccc; background-color: white; }
             QTabWidget::tab-bar { alignment: left; }
@@ -81,9 +75,10 @@ class QuantumExplorerGUI(QMainWindow):
             QPushButton { background-color: #007acc; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; }
             QPushButton:hover { background-color: #005a9f; }
             QPushButton:pressed { background-color: #004080; }
-        """)
+            """
+        )
 
-    def create_introduction_tab(self):
+    def create_introduction_tab(self) -> None:
         widget = QWidget()
         self.tab_widget.addTab(widget, "🚀 Introduction")
         layout = QVBoxLayout(widget)
@@ -92,284 +87,195 @@ class QuantumExplorerGUI(QMainWindow):
         text_edit.setFont(QFont("Arial", 11))
         content = '''
 <div style="font-family: Arial; font-size: 11pt;">
-    <h2>🌟 Welcome to the Quantum Hardware Demo Explorer!</h2>
-    <p>This interactive application demonstrates quantum algorithms that are
-    designed to run on <b>real quantum computers</b>.</p>
-
-    <h3>🔬 What is NISQ?</h3>
-    <p>We are currently in the <b>NISQ (Noisy Intermediate-Scale Quantum)</b>
-    era. This means that today's quantum computers have a limited number of
-    qubits (typically 50-1000) and are susceptible to noise, which can
-    corrupt calculations.</p>
-
-    <p>The algorithms in this explorer are specifically designed to be:</p>
-    <ul>
-        <li><b>Shallow</b>: They have a low number of sequential operations
-        (low "depth") to reduce the impact of noise.</li>
-        <li><b>Efficient</b>: They use a small number of qubits.</li>
-        <li><b>Hybrid</b>: They often combine classical and quantum computation to
-        solve practical problems.</li>
-    </ul>
-
-    <h3>🎯 Explore the Tabs:</h3>
-    <ul>
-        <li><b>NISQ Algorithms</b>: Discover algorithms like VQE and QAOA that
-        are at the forefront of quantum research.</li>
-        <li><b>Hardware-Ready Demos</b>: Run the most basic quantum circuits,
-        like Bell states, to verify the fundamental principles of quantum
-        mechanics on a real device.</li>
-    </ul>
-    <p>Ready to explore the quantum realm? Click through the tabs to see these
-    algorithms in action! 🚀</p>
+  <h2>🌟 Welcome to the Quantum Hardware Demo Explorer!</h2>
+  <p>This app runs <b>real hardware</b> jobs on IBM Quantum using Qiskit Runtime.</p>
+  <h3>🔑 Setup</h3>
+  <p>Set these environment variables before running:</p>
+  <pre>export QISKIT_IBM_TOKEN=your_token
+export QISKIT_IBM_CHANNEL=ibm_quantum
+export QISKIT_IBM_INSTANCE=ibm-q/open/main</pre>
+  <p>Create an account at <a href="https://quantum.ibm.com/">quantum.ibm.com</a>.</p>
+  <h3>🎯 What you can run</h3>
+  <ul>
+    <li>🌊 Single-qubit superposition</li>
+    <li>🔗 Bell state (2-qubit entanglement)</li>
+    <li>🌍 GHZ state (3-qubit entanglement)</li>
+  </ul>
 </div>
         '''
         text_edit.setHtml(content)
         layout.addWidget(text_edit)
 
-    def create_nisq_algorithms_tab(self):
-        widget = QWidget()
-        self.tab_widget.addTab(widget, "🔬 NISQ Algorithms")
-        main_layout = QHBoxLayout(widget)
-        splitter = QSplitter(Qt.Horizontal)
-        main_layout.addWidget(splitter)
-
-        desc_widget = QWidget()
-        desc_layout = QVBoxLayout(desc_widget)
-        desc_label = QLabel("🔬 NISQ-Era Quantum Algorithms")
-        desc_label.setFont(QFont("Arial", 16, QFont.Bold))
-        desc_layout.addWidget(desc_label)
-        desc_text = QTextEdit()
-        desc_text.setReadOnly(True)
-        desc_text.setFont(QFont("Arial", 10))
-        nisq_desc = """
-🎯 WHAT IS NISQ?
-
-NISQ = Noisy Intermediate-Scale Quantum
-• Current quantum computers (50-1000 qubits)
-• High error rates, limited gate depth
-• No error correction yet
-• Hybrid classical-quantum algorithms
-
-🚀 NISQ-OPTIMIZED ALGORITHMS:
-
-1. 🎲 QUANTUM RANDOM NUMBER GENERATOR
-   • True quantum randomness from superposition
-   • Perfect for cryptography and simulations
-
-2. ⚛️ VARIATIONAL QUANTUM EIGENSOLVER (VQE)
-   • Find ground state energies of molecules
-   • Hybrid optimization approach
-
-3. 🔀 QUANTUM APPROXIMATE OPTIMIZATION (QAOA)
-   • Solve combinatorial optimization problems
-   • Max-Cut, traveling salesman, etc.
-
-🔧 WHY THESE WORK ON NISQ DEVICES:
-• Shallow circuits (low gate depth)
-• Minimal qubits (2-10 typically)
-• Noise-tolerant algorithms
-
-💡 Try the interactive demos to see these algorithms in action!
-        """
-        desc_text.setPlainText(nisq_desc)
-        desc_layout.addWidget(desc_text)
-        splitter.addWidget(desc_widget)
-
-        demo_widget = QWidget()
-        demo_layout = QVBoxLayout(demo_widget)
-        control_layout = QVBoxLayout()
-
-        rng_btn = QPushButton("🎲 Quantum Random Numbers")
-        rng_btn.clicked.connect(self.demo_quantum_rng)
-        control_layout.addWidget(rng_btn)
-
-        vqe_btn = QPushButton("⚛️ VQE for H2 Molecule")
-        vqe_btn.clicked.connect(self.demo_vqe)
-        control_layout.addWidget(vqe_btn)
-
-        qaoa_btn = QPushButton("🔀 QAOA Optimization")
-        qaoa_btn.clicked.connect(self.demo_qaoa)
-        control_layout.addWidget(qaoa_btn)
-
-        demo_layout.addLayout(control_layout)
-
-        self.nisq_results = QTextEdit()
-        self.nisq_results.setFont(QFont("Courier", 9))
-        self.nisq_results.setReadOnly(True)
-        demo_layout.addWidget(self.nisq_results)
-
-        self.nisq_figure = Figure(figsize=(10, 6))
-        self.nisq_canvas = FigureCanvas(self.nisq_figure)
-        demo_layout.addWidget(self.nisq_canvas)
-
-        splitter.addWidget(demo_widget)
-        splitter.setSizes([400, 800])
-
-    def create_hardware_ready_tab(self):
+    def create_hardware_ready_tab(self) -> None:
         widget = QWidget()
         self.tab_widget.addTab(widget, "🚀 Hardware-Ready Demos")
         main_layout = QHBoxLayout(widget)
         splitter = QSplitter(Qt.Horizontal)
         main_layout.addWidget(splitter)
 
+        # Left: description
         desc_widget = QWidget()
         desc_layout = QVBoxLayout(desc_widget)
-        desc_label = QLabel("🚀 Hardware-Ready Demos")
-        desc_label.setFont(QFont("Arial", 16, QFont.Bold))
-        desc_layout.addWidget(desc_label)
-        desc_text = QTextEdit()
-        desc_text.setReadOnly(True)
-        desc_text.setFont(QFont("Arial", 10))
-        hardware_desc = """
-🎯 WHAT ARE HARDWARE-READY DEMOS?
-
-These are the simplest, most fundamental quantum circuits. They are perfect for testing a real quantum computer's capabilities.
-
-✅ Key Features:
-• Minimal Qubits (1-3)
-• Minimal Depth (1-2 gates)
-• Demonstrates core quantum phenomena
-
-🚀 THE DEMOS:
-
-1. 🌊 SINGLE QUBIT SUPERPOSITION
-   • The "Hello, World!" of quantum computing
-   • Puts a single qubit into a 50/50 state of 0 and 1
-
-2. 🔗 BELL STATE (ENTANGLEMENT)
-   • Creates a mysterious link between two qubits
-   • Measuring one instantly affects the other
-
-3. 🌍 GHZ STATE (3-QUBIT ENTANGLEMENT)
-   • Entangles three qubits into a single state
-   • Used in quantum error correction and networking
-
-💡 Try the interactive demos to create and measure these fundamental quantum states!
-        """
-        desc_text.setPlainText(hardware_desc)
-        desc_layout.addWidget(desc_text)
+        title = QLabel("🚀 Hardware-Ready Demos")
+        title.setFont(QFont("Arial", 16, QFont.Bold))
+        desc_layout.addWidget(title)
+        desc = QTextEdit()
+        desc.setReadOnly(True)
+        desc.setFont(QFont("Arial", 10))
+        desc.setPlainText(
+            "Simple, shallow circuits to validate a real quantum device."
+        )
+        desc_layout.addWidget(desc)
         splitter.addWidget(desc_widget)
 
+        # Right: controls and results
         demo_widget = QWidget()
         demo_layout = QVBoxLayout(demo_widget)
-        control_layout = QVBoxLayout()
 
-        superposition_btn = QPushButton("🌊 Single Qubit Superposition")
-        superposition_btn.clicked.connect(self.demo_single_qubit_superposition)
-        control_layout.addWidget(superposition_btn)
+        buttons_layout = QVBoxLayout()
 
-        bell_state_btn = QPushButton("🔗 Bell State (Entanglement)")
-        bell_state_btn.clicked.connect(self.demo_bell_state)
-        control_layout.addWidget(bell_state_btn)
+        btn_super = QPushButton("🌊 Single Qubit Superposition")
+        btn_super.clicked.connect(self.run_superposition)
+        buttons_layout.addWidget(btn_super)
 
-        ghz_state_btn = QPushButton("🌍 GHZ State (3-Qubit Entanglement)")
-        ghz_state_btn.clicked.connect(self.demo_ghz_state)
-        control_layout.addWidget(ghz_state_btn)
+        btn_bell = QPushButton("🔗 Bell State (2 Qubits)")
+        btn_bell.clicked.connect(self.run_bell)
+        buttons_layout.addWidget(btn_bell)
 
-        demo_layout.addLayout(control_layout)
+        btn_ghz = QPushButton("🌍 GHZ State (3 Qubits)")
+        btn_ghz.clicked.connect(self.run_ghz)
+        buttons_layout.addWidget(btn_ghz)
 
-        self.hardware_results = QTextEdit()
-        self.hardware_results.setFont(QFont("Courier", 10))
-        self.hardware_results.setReadOnly(True)
-        demo_layout.addWidget(self.hardware_results)
+        demo_layout.addLayout(buttons_layout)
 
-        self.hardware_figure = Figure(figsize=(12, 6))
-        self.hardware_canvas = FigureCanvas(self.hardware_figure)
-        demo_layout.addWidget(self.hardware_canvas)
+        self.results = QTextEdit()
+        self.results.setFont(QFont("Courier", 10))
+        self.results.setReadOnly(True)
+        demo_layout.addWidget(self.results)
+
+        self.figure = Figure(figsize=(12, 6))
+        self.canvas = FigureCanvas(self.figure)
+        demo_layout.addWidget(self.canvas)
 
         splitter.addWidget(demo_widget)
         splitter.setSizes([450, 750])
 
-    def _run_demo(self, circuit_func, name, results_widget, figure, canvas):
+    # ---- IBM Runtime helpers ----
+    def _ensure_service(self) -> None:
+        if self.service is not None:
+            return
         try:
-            qc, counts, description = circuit_func()
-
-            results_widget.clear()
-            results_widget.append(f"🚀 RUNNING: {name}\n")
-            results_widget.append(f"{description}\n")
-            results_widget.append("📊 Measurement Results (1024 shots):")
-
-            sorted_counts = sorted(counts.items())
-            for outcome, count in sorted_counts:
-                percentage = (count / 1024) * 100
-                clean_outcome = outcome.replace(" ", "")
-                results_widget.append(f"  |{clean_outcome}⟩: {count} times ({percentage:.1f}%)")
-
-            figure.clear()
-            ax1 = figure.add_subplot(1, 2, 1)
-            plot_histogram(counts, ax=ax1, title="Measurement Outcomes")
-
-            ax2 = figure.add_subplot(1, 2, 2)
-            qc.draw(output='mpl', ax=ax2)
-            ax2.set_title("Quantum Circuit")
-
-            canvas.draw()
-
+            self.service = QiskitRuntimeService()
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Could not run demo '{name}': {e}")
+            QMessageBox.critical(
+                self,
+                "IBM Runtime Not Configured",
+                "IBM Runtime credentials not found.\n"
+                "Set QISKIT_IBM_TOKEN, QISKIT_IBM_CHANNEL, QISKIT_IBM_INSTANCE and retry.\n\n"
+                f"Original error: {e}",
+            )
+            raise
 
-    def demo_quantum_rng(self):
-        _, qc, counts, desc = self.nisq_examples.quantum_random_number_generator()
-        self._display_nisq_results("Quantum Random Number Generator", qc, counts, desc)
+    def _select_backend(self, qubits: int):
+        self._ensure_service()
+        candidates = [
+            b for b in self.service.backends()
+            if getattr(b, "num_qubits", 0) >= qubits
+        ]
+        if not candidates:
+            raise RuntimeError("No suitable backends available for required qubit count")
+        # Choose first operational backend
+        for b in candidates:
+            try:
+                if b.status().operational:
+                    return b
+            except Exception:
+                continue
+        return candidates[0]
 
-    def demo_vqe(self):
-        qc, result, desc = self.nisq_examples.vqe_h2_molecule()
-        self._display_nisq_results("VQE for H2", qc, result, desc)
+    def _run_on_hardware(self, qc: QuantumCircuit, shots: int = 1024):
+        backend = self._select_backend(qc.num_qubits)
+        # Use a runtime Session bound to the selected backend; the service was
+        # initialized in _ensure_service(), so default session discovery works.
+        with Session(backend=backend) as session:
+            # Create a Sampler bound to the active session context
+            sampler = Sampler()
+            job = sampler.run([qc], shots=shots)
+            result = job.result()
+            quasi = result.quasi_dists[0]
+            bitlen = qc.num_clbits or qc.num_qubits
+            counts = {}
+            for k, v in quasi.items():
+                try:
+                    idx = int(k)
+                except Exception:
+                    try:
+                        idx = int(k, 2)
+                    except Exception:
+                        continue
+                key = format(idx, f"0{bitlen}b")
+                counts[key] = int(round(v * shots))
+            # Resolve backend name robustly across versions
+            backend_name = getattr(backend, "name", None)
+            if callable(backend_name):
+                backend_name = backend_name()
+            if not isinstance(backend_name, str):
+                backend_name = getattr(backend, "backend_name", "backend")
+            return counts, backend_name
 
-    def demo_qaoa(self):
-        qc, result, desc = self.nisq_examples.qaoa_max_cut()
-        self._display_nisq_results("QAOA Max-Cut", qc, result, desc)
+    # ---- Demos ----
+    def run_superposition(self) -> None:
+        qc = QuantumCircuit(1, 1)
+        qc.h(0)
+        qc.measure(0, 0)
+        self._execute_and_display("Single Qubit Superposition", qc)
 
-    def _display_nisq_results(self, name, qc, result, description):
-        self.nisq_results.clear()
-        self.nisq_results.append(f"🚀 {name}\n")
-        self.nisq_results.append(f"{description}\n")
-        self.nisq_results.append("📊 Results:")
-        self.nisq_results.append(str(result))
+    def run_bell(self) -> None:
+        qc = QuantumCircuit(2, 2)
+        qc.h(0)
+        qc.cx(0, 1)
+        qc.measure([0, 1], [0, 1])
+        self._execute_and_display("Bell State", qc)
 
-        self.nisq_figure.clear()
-        ax = self.nisq_figure.add_subplot(111)
-        qc.draw(output='mpl', ax=ax)
-        self.nisq_canvas.draw()
+    def run_ghz(self) -> None:
+        qc = QuantumCircuit(3, 3)
+        qc.h(0)
+        qc.cx(0, 1)
+        qc.cx(1, 2)
+        qc.measure([0, 1, 2], [0, 1, 2])
+        self._execute_and_display("GHZ State", qc)
 
-    def demo_single_qubit_superposition(self):
-        qc, counts, desc = self.hardware_demos.single_qubit_superposition()
-        self._display_hardware_results("Single Qubit Superposition", qc, counts, desc)
+    def _execute_and_display(self, name: str, qc: QuantumCircuit) -> None:
+        try:
+            counts, backend_name = self._run_on_hardware(qc)
+        except Exception as e:
+            QMessageBox.critical(self, "Hardware Run Failed", str(e))
+            return
 
-    def demo_bell_state(self):
-        qc, counts, desc = self.hardware_demos.create_bell_state()
-        self._display_hardware_results("Bell State", qc, counts, desc)
+        self.results.clear()
+        self.results.append(f"🚀 {name}\n")
+        self.results.append(f"Backend: {backend_name}\n")
+        self.results.append("📊 Measurement Results:\n")
+        total = max(1, sum(counts.values()))
+        for outcome, count in sorted(counts.items()):
+            pct = (count / total) * 100.0
+            self.results.append(f"  |{outcome}⟩: {count} ({pct:.1f}%)")
 
-    def demo_ghz_state(self):
-        qc, counts, desc = self.hardware_demos.create_ghz_state()
-        self._display_hardware_results("GHZ State", qc, counts, desc)
-
-    def _display_hardware_results(self, name, qc, counts, description):
-        self.hardware_results.clear()
-        self.hardware_results.append(f"🚀 {name}\n")
-        self.hardware_results.append(f"{description}\n")
-        self.hardware_results.append("📊 Measurement Results:")
-
-        sorted_counts = sorted(counts.items())
-        for outcome, count in sorted_counts:
-            percentage = (sum(counts.values()) / 100)
-            self.hardware_results.append(f"  |{outcome}⟩: {count} times ({count/percentage:.1f}%)")
-
-        self.hardware_figure.clear()
-        ax1 = self.hardware_figure.add_subplot(1, 2, 1)
+        self.figure.clear()
+        ax1 = self.figure.add_subplot(1, 2, 1)
         plot_histogram(counts, ax=ax1, title="Outcomes")
-        ax2 = self.hardware_figure.add_subplot(1, 2, 2)
-        qc.draw(output='mpl', ax=ax2)
+        ax2 = self.figure.add_subplot(1, 2, 2)
+        qc.draw(output="mpl", ax=ax2)
         ax2.set_title("Circuit")
-        self.hardware_canvas.draw()
+        self.canvas.draw()
 
 
-def main():
-    """Main function to launch the Quantum Explorer GUI"""
+def main() -> int:
     app = QApplication(sys.argv)
     explorer = QuantumExplorerGUI()
     explorer.show()
     return app.exec_()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main())

@@ -21,13 +21,16 @@ chmod +x run.sh
 ```
 
 This will automatically:
-- Check Python version (3.7+ required)
+
+- Check Python version (3.10+ required)
 - Create a virtual environment
 - Install all necessary dependencies
 - Launch the Quantum Explorer GUI
 
 ### Manual Setup
+
 If you prefer manual installation:
+
 ```bash
 # Create virtual environment
 python3 -m venv venv
@@ -38,7 +41,9 @@ pip install qiskit qiskit-aer qiskit-ibm-runtime matplotlib numpy PyQt5 pylatexe
 ```
 
 ### Quick Start - Interactive GUI
+
 Launch the interactive Quantum Computing Explorer:
+
 ```bash
 # Using the run script (recommended)
 ./run.sh gui
@@ -48,6 +53,7 @@ python launch_gui.py
 ```
 
 ### Other Run Options
+
 ```bash
 ./run.sh demos        # Interactive command-line demonstrations
 ./run.sh test          # Run quantum computing tests  
@@ -58,12 +64,13 @@ python launch_gui.py
 ```
 
 The GUI provides:
-- 🌊 **Superposition demonstrations** with live circuit visualization
-- 🔗 **Entanglement experiments** showing quantum correlations
-- 🔬 **NISQ algorithms** optimized for real quantum computers
+
+- 🌊 **Superposition** and 🔗 **Entanglement** circuits runnable on real hardware
+- 🔬 **NISQ-friendly** examples kept shallow and low-qubit
 - 🚀 **Hardware-ready demos** perfect for testing quantum devices
 
 ### Project Structure
+
 - `gui/` - Interactive GUI application
 - `examples/` - Runnable quantum computing examples
 - `notebooks/` - Jupyter notebooks for learning
@@ -78,4 +85,22 @@ The GUI provides:
 
 ---
 
-*Note: These examples are designed for educational and experimental purposes on real quantum hardware. For advanced applications like medical genomics and cosmology, see the documentation in `docs/space_medical_quantum_applications.md`.*
+*Note: These examples are designed for educational and experimental purposes on real quantum hardware.*
+
+## 🔑 Running on IBM Quantum Hardware
+
+To submit jobs to real hardware you need IBM Quantum credentials. Set these environment variables before launching the GUI:
+
+```bash
+export QISKIT_IBM_TOKEN=your_token_here
+export QISKIT_IBM_CHANNEL=ibm_quantum
+export QISKIT_IBM_INSTANCE=ibm-q/open/main
+```
+
+Then start the app as usual:
+
+```bash
+./run.sh gui
+```
+
+Create an account and generate an API token at: <https://quantum.ibm.com/>
