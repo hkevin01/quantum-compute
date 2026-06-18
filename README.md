@@ -20,7 +20,7 @@
 # Quantum Computing Explorer
 
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/IBM_Q_system_one.jpg/800px-IBM_Q_system_one.jpg" width="700" alt="IBM Q System One quantum computer at CES 2019"/>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/IBM_Quantum_System_One.jpg/500px-IBM_Quantum_System_One.jpg" width="700" alt="IBM Quantum System One at TJ Watson Research Center"/>
   <br/>
   <em>IBM Q System One - the world's first commercial quantum computer in a glass enclosure, housing dilution refrigerators that cool qubits to 15 millikelvin, colder than outer space. This is the class of hardware this project targets.</em>
 </p>
@@ -60,7 +60,7 @@ Classical computers represent information as bits - discrete `0` or `1` voltages
 - **Interference** is the mechanism through which correct answers are amplified and wrong answers cancel out. Grover's algorithm, for instance, uses destructive interference to eliminate non-solutions and constructive interference to highlight the correct answer in O(√N) steps.
 
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Bloch_sphere.svg/360px-Bloch_sphere.svg.png" width="280" alt="Bloch sphere representation of a qubit"/>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Bloch_sphere.svg/500px-Bloch_sphere.svg.png" width="320" alt="Bloch sphere representation of a qubit"/>
   <br/>
   <em>The Bloch sphere is the standard geometric representation of a single qubit state. Any pure qubit state |ψ⟩ = α|0⟩ + β|1⟩ maps to a point on the surface. Classical bits occupy only the two poles (north = |0⟩, south = |1⟩). Quantum gates are rotations of this sphere.</em>
 </p>
@@ -93,9 +93,9 @@ Understanding when to reach for a quantum algorithm versus a classical one is th
 | 8 | <sub>Cryptographic hashing</sub> | <sub>SHA-256 classical</sub> | <sub>Grover halves security bits</sub> | <sub>Quadratic attack</sub> | <sub>Cryptanalysis research</sub> | <sub>Everyday data integrity checking</sub> |
 
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Quantum_teleportation_circuit.svg/700px-Quantum_teleportation_circuit.svg.png" width="620" alt="Example quantum circuit with gates and measurements"/>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Quantum_teleportation_diagram.png/500px-Quantum_teleportation_diagram.png" width="580" alt="Quantum teleportation circuit diagram showing qubit registers and classical communication"/>
   <br/>
-  <em>A typical quantum circuit diagram. Time flows left to right. Horizontal lines are qubit wires, boxes and symbols are quantum gates (H = Hadamard, CNOT = controlled-NOT), and the meter symbols represent measurements that collapse the qubit to a classical bit. Circuit depth - the number of gate layers from left to right - is the primary NISQ design constraint.</em>
+  <em>Quantum teleportation circuit - one of the most celebrated quantum protocols. It transmits a qubit state using two classical bits plus one pre-shared entangled pair, demonstrating that quantum information is fundamentally different from classical information. Time flows left to right; the double lines are classical bit channels after measurement. Understanding this circuit is a prerequisite for quantum error correction and distributed quantum computing.</em>
 </p>
 
 ### Table 2 - NISQ Algorithm Comparison Matrix
@@ -258,7 +258,7 @@ The circuit starts by placing the input register in uniform superposition using 
 $$|x\rangle \xrightarrow{H^{\otimes n}} \frac{1}{\sqrt{2^n}} \sum_{z \in \{0,1\}^n} (-1)^{f(x) \cdot z} |z\rangle$$
 
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Deutsch-Jozsa-algorithm-quantum-circuit.png/700px-Deutsch-Jozsa-algorithm-quantum-circuit.png" width="600" alt="Deutsch-Josza quantum circuit diagram"/>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Deutsch-Jozsa-algorithm-quantum-circuit.png/500px-Deutsch-Jozsa-algorithm-quantum-circuit.png" width="580" alt="Deutsch-Josza quantum circuit diagram"/>
   <br/>
   <em>The Deutsch-Josza circuit. The top n wires are the input register initialized to |0⟩, the bottom wire is the ancilla initialized to |1⟩. Hadamard gates create uniform superposition across all 2^n inputs simultaneously. The oracle Uf encodes the function. After a final Hadamard layer, measuring all zeros on the input register proves the function is constant - achieved in a single query regardless of n.</em>
 </p>
@@ -275,7 +275,7 @@ After approximately $\frac{\pi}{4}\sqrt{N}$ iterations, the target state's proba
 $$D = 2|\psi\rangle\langle\psi| - I \quad \text{where} \quad |\psi\rangle = H^{\otimes n}|0\rangle$$
 
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Grovers_algorithm.svg/600px-Grovers_algorithm.svg.png" width="540" alt="Grover's algorithm amplitude amplification across iterations"/>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Grovers_algorithm.svg/500px-Grovers_algorithm.svg.png" width="540" alt="Grover's algorithm amplitude amplification across iterations"/>
   <br/>
   <em>Grover's amplitude amplification in action. Each iteration of the Grover diffusion operator rotates the state vector by 2θ toward the target state |ω⟩. The target amplitude grows while all others shrink. After exactly ⌊π√N/4⌋ iterations the target probability reaches its peak - overshoot and it starts declining again, so the iteration count matters precisely.</em>
 </p>
@@ -291,9 +291,9 @@ $$E(\theta) = \langle\psi(\theta)|H|\psi(\theta)\rangle \geq E_{ground}$$
 The classical computer optimizes the parameters θ (using COBYLA, SPSA, or gradient descent), while the quantum processor evaluates E(θ) for each new parameter set. This hybrid loop is key: the quantum part stays shallow (one forward pass), while the heavy lifting of optimization is done classically. VQE was chosen over Quantum Phase Estimation (QPE) specifically because QPE requires deep circuits incompatible with NISQ noise levels. VQE trades deterministic precision for noise tolerance.
 
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Quantum_Fourier_transform.png/600px-Quantum_Fourier_transform.png" width="540" alt="Quantum Fourier Transform circuit"/>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Quantum_Fourier_transform_on_three_qubits.svg/500px-Quantum_Fourier_transform_on_three_qubits.svg.png" width="560" alt="Quantum Fourier Transform circuit on three qubits"/>
   <br/>
-  <em>The Quantum Fourier Transform circuit for n qubits. It applies a sequence of Hadamard gates and controlled phase rotations R_k = diag(1, e^(2πi/2^k)) in a butterfly pattern, requiring only O(n^2) gates total. The classical FFT needs O(N log N) = O(2^n * n) operations. This exponential compression is why QFT is the engine behind Shor's factoring algorithm and quantum phase estimation.</em>
+  <em>The Quantum Fourier Transform circuit on three qubits. H is the Hadamard gate; R_k = diag(1, e^(2pi*i/2^k)) are controlled phase rotation gates. The full n-qubit QFT requires O(n^2) gates, while the classical FFT needs O(2^n * n) operations - an exponential compression. This gate sequence is the foundation of Shor's factoring algorithm, quantum phase estimation, and period finding. Understanding this circuit is essential before tackling any advanced quantum algorithm.</em>
 </p>
 
 **Medical application relevance:** Drug-receptor binding energies are ground-state problems. VQE can in principle compute binding affinities for small molecules that are intractable for classical density functional theory.
@@ -516,7 +516,7 @@ The `src/medical/` modules represent forward-looking research directions where q
 ### Why Quantum for Drug Discovery?
 
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Hydrogen_Density_Plots.png/600px-Hydrogen_Density_Plots.png" width="540" alt="Hydrogen atom electron density plots showing quantum orbital structure"/>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Hydrogen_Density_Plots.png/500px-Hydrogen_Density_Plots.png" width="540" alt="Hydrogen atom electron density plots showing quantum orbital structure"/>
   <br/>
   <em>Electron density plots for the hydrogen atom's quantum orbitals (1s through 3d). Each orbital is a solution to the Schrodinger equation - a quantum mechanical probability distribution. Computing these distributions for multi-electron molecules (drugs, proteins) requires exponentially growing classical resources. A quantum computer with N qubits can represent the full 2^N-dimensional Hilbert space of N electrons directly in hardware.</em>
 </p>
@@ -573,9 +573,9 @@ graph TD
 ```
 
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Superconducting_qubit_array.jpg/640px-Superconducting_qubit_array.jpg" width="580" alt="Superconducting qubit array chip used in IBM quantum processors"/>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Superconducting_Quantum_Chip_with_Dispersive_Background_2.png/500px-Superconducting_Quantum_Chip_with_Dispersive_Background_2.png" width="540" alt="Superconducting transmon-based quantum processor chip rendering"/>
   <br/>
-  <em>A superconducting qubit processor chip. The gold cross-shaped structures are transmon qubits - superconducting circuits that behave as artificial two-level atoms when cooled to millikelvin temperatures. The lines connecting them are microwave resonators used for qubit-qubit coupling (the physical CNOT gate). Each connection in this lattice corresponds to a possible two-qubit gate, and Qiskit's transpiler must route logical circuits through this specific topology.</em>
+  <em>A superconducting transmon-based quantum processor chip layout. Each cross-shaped island is a transmon qubit - a superconducting LC circuit that behaves as a two-level quantum system when cooled to ~15 millikelvin. The connecting lines are coplanar waveguide resonators that mediate qubit-qubit interactions, enabling the physical CNOT gate. The specific connectivity of this graph is the topology that Qiskit's transpiler must route every logical circuit through, which is why transpilation can increase circuit depth significantly.</em>
 </p>
 
 > [!TIP]
@@ -751,9 +751,9 @@ This project builds on foundational academic work. The following references are 
 ## Contributing
 
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/2019_Google_quantum_supremacy_paper_screenshot.png/700px-2019_Google_quantum_supremacy_paper_screenshot.png" width="620" alt="Google quantum supremacy experiment results from 2019 Nature paper"/>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Wire_Bonded_Superconducting_Quantum_Chip_with_6_Transmons_003.png/500px-Wire_Bonded_Superconducting_Quantum_Chip_with_6_Transmons_003.png" width="560" alt="Wire-bonded superconducting quantum chip with 6 transmon qubits and test junctions"/>
   <br/>
-  <em>Results from Google's 2019 quantum supremacy experiment (Arute et al., Nature 574). Their 53-qubit Sycamore processor completed a specific random circuit sampling task in 200 seconds that they estimated would take the world's best classical supercomputer 10,000 years. While the classical estimate has since been challenged, this experiment marked the beginning of the quantum utility era and validated the NISQ approach. IBM's hardware, targeted by this project, has since matched and exceeded Sycamore's qubit count.</em>
+  <em>A wire-bonded superconducting quantum chip with 6 transmon qubits and 12 test junctions, rendered in detail. The gold wire bonds connect the chip to the surrounding carrier PCB, routing control pulses from room-temperature electronics down to the millikelvin stage. This is the physical layer that every circuit in this project ultimately executes on - logical gates like H and CNOT become precisely timed microwave pulses applied to these structures. Contributing a new algorithm to this project means it will eventually run on hardware that looks exactly like this.</em>
 </p>
 
 Contributions are welcome. The architecture is designed so that new algorithm modules, new domain science modules, and new GUI tabs can be added independently without touching existing code.
