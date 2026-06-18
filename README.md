@@ -19,6 +19,12 @@
 
 # Quantum Computing Explorer
 
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/IBM_Q_system_one.jpg/800px-IBM_Q_system_one.jpg" width="700" alt="IBM Q System One quantum computer at CES 2019"/>
+  <br/>
+  <em>IBM Q System One - the world's first commercial quantum computer in a glass enclosure, housing dilution refrigerators that cool qubits to 15 millikelvin, colder than outer space. This is the class of hardware this project targets.</em>
+</p>
+
 > **A hardware-ready, NISQ-era quantum computing framework** that bridges the gap between classical simulation and real IBM quantum hardware. This project gives researchers, students, and engineers an interactive environment to learn, simulate, and deploy quantum algorithms - from foundational circuits to applications in cosmology, medical research, and optimization.
 
 Quantum computing represents a fundamentally different computational paradigm. Instead of classical bits that hold either `0` or `1`, quantum computers use **qubits** that can exist in superpositions of both states simultaneously. When combined with entanglement and quantum interference, these properties allow certain algorithms to solve problems exponentially faster than any classical machine could. This repository provides a practical, hands-on toolkit for exploring that power today - using real quantum hardware accessible through IBM Quantum's cloud platform.
@@ -53,6 +59,12 @@ Classical computers represent information as bits - discrete `0` or `1` voltages
 - **Entanglement** creates correlations between qubits that have no classical analog. Measuring one qubit instantly determines the state of its entangled partner, regardless of distance. This is the engine behind quantum cryptography and teleportation protocols.
 - **Interference** is the mechanism through which correct answers are amplified and wrong answers cancel out. Grover's algorithm, for instance, uses destructive interference to eliminate non-solutions and constructive interference to highlight the correct answer in O(√N) steps.
 
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Bloch_sphere.svg/360px-Bloch_sphere.svg.png" width="280" alt="Bloch sphere representation of a qubit"/>
+  <br/>
+  <em>The Bloch sphere is the standard geometric representation of a single qubit state. Any pure qubit state |ψ⟩ = α|0⟩ + β|1⟩ maps to a point on the surface. Classical bits occupy only the two poles (north = |0⟩, south = |1⟩). Quantum gates are rotations of this sphere.</em>
+</p>
+
 We are currently in the **NISQ era** (Noisy Intermediate-Scale Quantum), characterized by devices with 50-500 qubits that are too noisy for full fault-tolerant computation but powerful enough to demonstrate genuine quantum utility for specific problems. This project is designed with NISQ constraints at its core.
 
 > [!NOTE]
@@ -79,6 +91,12 @@ Understanding when to reach for a quantum algorithm versus a classical one is th
 | 6 | <sub>Linear systems Ax=b</sub> | <sub>Gaussian elimination O(N^3)</sub> | <sub>HHL O(log N poly(k))</sub> | <sub>Exponential (sparse A)</sub> | <sub>Large sparse systems in finance/ML</sub> | <sub>Dense matrices or when solution must be read out fully</sub> |
 | 7 | <sub>Machine learning classification</sub> | <sub>SVM, neural nets</sub> | <sub>QSVM, QNN (heuristic)</sub> | <sub>Unclear</sub> | <sub>Research; quantum kernel advantage possible</sub> | <sub>Production ML today - classical dominates</sub> |
 | 8 | <sub>Cryptographic hashing</sub> | <sub>SHA-256 classical</sub> | <sub>Grover halves security bits</sub> | <sub>Quadratic attack</sub> | <sub>Cryptanalysis research</sub> | <sub>Everyday data integrity checking</sub> |
+
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Quantum_teleportation_circuit.svg/700px-Quantum_teleportation_circuit.svg.png" width="620" alt="Example quantum circuit with gates and measurements"/>
+  <br/>
+  <em>A typical quantum circuit diagram. Time flows left to right. Horizontal lines are qubit wires, boxes and symbols are quantum gates (H = Hadamard, CNOT = controlled-NOT), and the meter symbols represent measurements that collapse the qubit to a classical bit. Circuit depth - the number of gate layers from left to right - is the primary NISQ design constraint.</em>
+</p>
 
 ### Table 2 - NISQ Algorithm Comparison Matrix
 
@@ -134,6 +152,12 @@ graph TD
 The layered architecture ensures that changing the GUI never breaks the algorithm logic, and swapping simulation backends (local Aer vs. IBM cloud) requires only a one-line config change at the runtime layer. Domain modules (medical, cosmology) are isolated so new research domains can be plugged in without touching the core algorithm engine.
 
 ---
+
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/The_Hadamard-CNOT_transform_on_the_zero-state.png/500px-The_Hadamard-CNOT_transform_on_the_zero-state.png" width="460" alt="Bell state creation circuit: Hadamard followed by CNOT"/>
+  <br/>
+  <em>The Bell state creation circuit - the simplest entanglement demonstration and the circuit with the best fidelity on real IBM hardware. A Hadamard gate puts qubit 0 into superposition, then a CNOT gate entangles both qubits. The result is the maximally entangled state (|00⟩ + |11⟩)/√2, meaning both qubits are always measured together.</em>
+</p>
 
 ## System Data Flow
 
@@ -233,6 +257,12 @@ The circuit starts by placing the input register in uniform superposition using 
 
 $$|x\rangle \xrightarrow{H^{\otimes n}} \frac{1}{\sqrt{2^n}} \sum_{z \in \{0,1\}^n} (-1)^{f(x) \cdot z} |z\rangle$$
 
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Deutsch-Jozsa-algorithm-quantum-circuit.png/700px-Deutsch-Jozsa-algorithm-quantum-circuit.png" width="600" alt="Deutsch-Josza quantum circuit diagram"/>
+  <br/>
+  <em>The Deutsch-Josza circuit. The top n wires are the input register initialized to |0⟩, the bottom wire is the ancilla initialized to |1⟩. Hadamard gates create uniform superposition across all 2^n inputs simultaneously. The oracle Uf encodes the function. After a final Hadamard layer, measuring all zeros on the input register proves the function is constant - achieved in a single query regardless of n.</em>
+</p>
+
 > [!NOTE]
 > Deutsch-Josza is a "promise problem" - it only works because the function is *guaranteed* to be constant or balanced. This is why it's used as a teaching algorithm rather than a practical one: real-world functions are not given with this promise.
 
@@ -244,6 +274,12 @@ After approximately $\frac{\pi}{4}\sqrt{N}$ iterations, the target state's proba
 
 $$D = 2|\psi\rangle\langle\psi| - I \quad \text{where} \quad |\psi\rangle = H^{\otimes n}|0\rangle$$
 
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Grovers_algorithm.svg/600px-Grovers_algorithm.svg.png" width="540" alt="Grover's algorithm amplitude amplification across iterations"/>
+  <br/>
+  <em>Grover's amplitude amplification in action. Each iteration of the Grover diffusion operator rotates the state vector by 2θ toward the target state |ω⟩. The target amplitude grows while all others shrink. After exactly ⌊π√N/4⌋ iterations the target probability reaches its peak - overshoot and it starts declining again, so the iteration count matters precisely.</em>
+</p>
+
 **Why Grover's over classical search:** For a database of 1 million items, classical search needs up to 1,000,000 queries; Grover needs ~785. On quantum hardware, this is demonstrable with just 3 qubits (N=8). We use 3-5 qubits to keep circuits shallow enough for real hardware.
 
 ### Variational Quantum Eigensolver (VQE)
@@ -253,6 +289,12 @@ VQE is the workhorse of NISQ-era chemistry and materials science. It finds the g
 $$E(\theta) = \langle\psi(\theta)|H|\psi(\theta)\rangle \geq E_{ground}$$
 
 The classical computer optimizes the parameters θ (using COBYLA, SPSA, or gradient descent), while the quantum processor evaluates E(θ) for each new parameter set. This hybrid loop is key: the quantum part stays shallow (one forward pass), while the heavy lifting of optimization is done classically. VQE was chosen over Quantum Phase Estimation (QPE) specifically because QPE requires deep circuits incompatible with NISQ noise levels. VQE trades deterministic precision for noise tolerance.
+
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Quantum_Fourier_transform.png/600px-Quantum_Fourier_transform.png" width="540" alt="Quantum Fourier Transform circuit"/>
+  <br/>
+  <em>The Quantum Fourier Transform circuit for n qubits. It applies a sequence of Hadamard gates and controlled phase rotations R_k = diag(1, e^(2πi/2^k)) in a butterfly pattern, requiring only O(n^2) gates total. The classical FFT needs O(N log N) = O(2^n * n) operations. This exponential compression is why QFT is the engine behind Shor's factoring algorithm and quantum phase estimation.</em>
+</p>
 
 **Medical application relevance:** Drug-receptor binding energies are ground-state problems. VQE can in principle compute binding affinities for small molecules that are intractable for classical density functional theory.
 
@@ -473,6 +515,12 @@ The `src/medical/` modules represent forward-looking research directions where q
 
 ### Why Quantum for Drug Discovery?
 
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Hydrogen_Density_Plots.png/600px-Hydrogen_Density_Plots.png" width="540" alt="Hydrogen atom electron density plots showing quantum orbital structure"/>
+  <br/>
+  <em>Electron density plots for the hydrogen atom's quantum orbitals (1s through 3d). Each orbital is a solution to the Schrodinger equation - a quantum mechanical probability distribution. Computing these distributions for multi-electron molecules (drugs, proteins) requires exponentially growing classical resources. A quantum computer with N qubits can represent the full 2^N-dimensional Hilbert space of N electrons directly in hardware.</em>
+</p>
+
 Simulating how a drug molecule interacts with a protein target requires computing the quantum mechanical ground state of a combined electron system. For small molecules (~10-20 atoms), classical methods like Density Functional Theory (DFT) work reasonably well. But for larger molecules or when high accuracy is required, the full configuration interaction (FCI) method scales exponentially: an N-electron system requires 2^N basis states. Quantum computers represent this naturally - N qubits can represent 2^N states simultaneously.
 
 VQE applied to molecular Hamiltonians has been demonstrated for H2, LiH, and BeH2 on real quantum hardware, giving ground-state energies within chemical accuracy (< 1 kcal/mol) of classical CCSD(T) benchmarks.
@@ -523,6 +571,12 @@ graph TD
     style C fill:#dc2626,color:#fff
     style I fill:#16a34a,color:#fff
 ```
+
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Superconducting_qubit_array.jpg/640px-Superconducting_qubit_array.jpg" width="580" alt="Superconducting qubit array chip used in IBM quantum processors"/>
+  <br/>
+  <em>A superconducting qubit processor chip. The gold cross-shaped structures are transmon qubits - superconducting circuits that behave as artificial two-level atoms when cooled to millikelvin temperatures. The lines connecting them are microwave resonators used for qubit-qubit coupling (the physical CNOT gate). Each connection in this lattice corresponds to a possible two-qubit gate, and Qiskit's transpiler must route logical circuits through this specific topology.</em>
+</p>
 
 > [!TIP]
 > For educational circuits (Bell states, Deutsch-Josza), readout error mitigation alone recovers near-ideal results on modern IBM hardware. Zero-noise extrapolation is most valuable for VQE and QAOA where accumulated gate errors significantly bias energy estimates.
@@ -695,6 +749,12 @@ This project builds on foundational academic work. The following references are 
 ---
 
 ## Contributing
+
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/2019_Google_quantum_supremacy_paper_screenshot.png/700px-2019_Google_quantum_supremacy_paper_screenshot.png" width="620" alt="Google quantum supremacy experiment results from 2019 Nature paper"/>
+  <br/>
+  <em>Results from Google's 2019 quantum supremacy experiment (Arute et al., Nature 574). Their 53-qubit Sycamore processor completed a specific random circuit sampling task in 200 seconds that they estimated would take the world's best classical supercomputer 10,000 years. While the classical estimate has since been challenged, this experiment marked the beginning of the quantum utility era and validated the NISQ approach. IBM's hardware, targeted by this project, has since matched and exceeded Sycamore's qubit count.</em>
+</p>
 
 Contributions are welcome. The architecture is designed so that new algorithm modules, new domain science modules, and new GUI tabs can be added independently without touching existing code.
 
