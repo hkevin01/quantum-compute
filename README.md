@@ -205,29 +205,29 @@ The project is split into four distinct layers that communicate cleanly, ensurin
 
 ```mermaid
 graph TD
-    A["User / Researcher"] --> B["GUI Layer\nguantum_explorer.py"]
-    A --> C["CLI Layer\nrun.sh / scripts/"]
-    A --> D["Notebook Layer\nJupyter Tutorials"]
+    A[User / Researcher] --> B[GUI Layer: quantum_explorer.py]
+    A --> C[CLI Layer: run.sh and scripts]
+    A --> D[Notebook Layer: Jupyter Tutorials]
 
-    B --> E["Examples Engine\nexamples/"]
+    B --> E[Examples Engine: examples/]
     C --> E
     D --> E
 
-    E --> F["NISQ Algorithms\nnisq_examples.py"]
-    E --> G["Core Algorithms\nquantum_algorithms.py"]
-    E --> H["Hardware Demos\nhardware_ready_demo.py"]
+    E --> F[NISQ Algorithms: nisq_examples.py]
+    E --> G[Core Algorithms: quantum_algorithms.py]
+    E --> H[Hardware Demos: hardware_ready_demo.py]
 
-    F --> I["Qiskit Runtime Layer"]
+    F --> I[Qiskit Runtime Layer]
     G --> I
     H --> I
 
-    I --> J["AerSimulator\nLocal Simulation"]
-    I --> K["IBM Quantum Cloud\nReal Hardware"]
+    I --> J[AerSimulator: Local Simulation]
+    I --> K[IBM Quantum Cloud: Real Hardware]
 
-    E --> L["Domain Modules\nsrc/"]
-    L --> M["Medical\nsrc/medical/"]
-    L --> N["Cosmology\nsrc/cosmology/"]
-    L --> O["Utilities\nsrc/utils/"]
+    E --> L[Domain Modules: src/]
+    L --> M[Medical: src/medical/]
+    L --> N[Cosmology: src/cosmology/]
+    L --> O[Utilities: src/utils/]
 
     style A fill:#1f2937,color:#fff
     style I fill:#6929C4,color:#fff
@@ -297,25 +297,25 @@ The transpilation step shown in the diagram can dramatically increase circuit de
 
 ```mermaid
 graph LR
-    A["launch_gui.py"] --> B["gui/quantum_explorer.py"]
-    A --> C["examples/interactive_demos.py"]
+    A[launch_gui.py] --> B[gui/quantum_explorer.py]
+    A --> C[examples/interactive_demos.py]
 
-    B --> D["examples/hardware_ready_demo.py"]
-    B --> E["examples/nisq_examples.py"]
-    B --> F["examples/quantum_algorithms.py"]
+    B --> D[examples/hardware_ready_demo.py]
+    B --> E[examples/nisq_examples.py]
+    B --> F[examples/quantum_algorithms.py]
 
-    D --> G["qiskit"]
+    D --> G[qiskit]
     E --> G
     F --> G
 
-    G --> H["qiskit-aer"]
-    G --> I["qiskit-ibm-runtime"]
+    G --> H[qiskit-aer]
+    G --> I[qiskit-ibm-runtime]
 
-    F --> J["src/utils/quantum_circuits.py"]
-    B --> K["src/medical/"]
-    B --> L["src/cosmology/"]
+    F --> J[src/utils/quantum_circuits.py]
+    B --> K[src/medical/]
+    B --> L[src/cosmology/]
 
-    K --> M["numpy / matplotlib"]
+    K --> M[numpy / matplotlib]
     L --> M
     J --> G
 
@@ -466,17 +466,17 @@ For the Shor's algorithm connection: the complete factoring circuit for RSA-2048
 
 ```mermaid
 flowchart LR
-    A["Problem Definition"] --> B{"Is classical\nsolution efficient?"}
-    B -- "Yes" --> C["Use Classical Algorithm\nNo quantum advantage"]
-    B -- "No" --> D{"Qubit count\n< 20?"}
-    D -- "No" --> E["Future: Fault-tolerant QC\nNot available today"]
-    D -- "Yes" --> F{"Gate depth\n< 100?"}
-    F -- "No" --> G["Reduce depth:\nVariational approach"]
-    F -- "Yes" --> H["NISQ Compatible\nDeploy to IBM Hardware"]
+    A[Problem Definition] --> B{Is classical solution efficient?}
+    B -->|Yes| C[Use Classical Algorithm]
+    B -->|No| D{Qubit count under 20?}
+    D -->|No| E[Future: Fault-tolerant QC]
+    D -->|Yes| F{Gate depth under 100?}
+    F -->|No| G[Reduce depth: Variational approach]
+    F -->|Yes| H[NISQ Compatible: Deploy to IBM Hardware]
     G --> H
-    H --> I["Transpile for backend"]
-    I --> J["Submit + Mitigate Errors"]
-    J --> K["Interpret Results\nwith Statistics"]
+    H --> I[Transpile for backend]
+    I --> J[Submit and Mitigate Errors]
+    J --> K[Interpret Results with Statistics]
 
     style C fill:#dc2626,color:#fff
     style E fill:#dc2626,color:#fff
@@ -743,17 +743,17 @@ Real quantum hardware produces noisy results. This project uses several error mi
 
 ```mermaid
 graph TD
-    A["Raw Quantum Circuit"] --> B["Transpilation\nOptimize for backend topology"]
-    B --> C["Execution on Hardware\n~0.1% error per CNOT"]
-    C --> D["Raw Measurement Counts"]
-    D --> E{"Error Mitigation\nStrategy"}
-    E --> F["Zero-Noise Extrapolation\nRun at 1x, 2x, 3x noise\nExtrapolate to 0 noise"]
-    E --> G["Readout Error Mitigation\nCalibrate measurement bias\nInvert calibration matrix"]
-    E --> H["Symmetry Verification\nPost-select results that\nsatisfy known symmetries"]
-    F --> I["Mitigated Result"]
+    A[Raw Quantum Circuit] --> B[Transpilation: Optimize for backend topology]
+    B --> C[Execution on Hardware: 0.1 percent error per CNOT]
+    C --> D[Raw Measurement Counts]
+    D --> E{Error Mitigation Strategy}
+    E --> F[Zero-Noise Extrapolation: Run at 1x 2x 3x noise and extrapolate to 0]
+    E --> G[Readout Error Mitigation: Calibrate and invert confusion matrix]
+    E --> H[Symmetry Verification: Post-select on known symmetries]
+    F --> I[Mitigated Result]
     G --> I
     H --> I
-    I --> J["Classical Post-Processing\nStatistics and interpretation"]
+    I --> J[Classical Post-Processing: Statistics and interpretation]
 
     style C fill:#dc2626,color:#fff
     style I fill:#16a34a,color:#fff
