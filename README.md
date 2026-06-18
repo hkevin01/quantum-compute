@@ -20,9 +20,11 @@
 # Quantum Computing Explorer
 
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/IBM_Quantum_System_One.jpg/500px-IBM_Quantum_System_One.jpg" width="700" alt="IBM Quantum System One at TJ Watson Research Center"/>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/IBM_Quantum_System_One.jpg/500px-IBM_Quantum_System_One.jpg" width="420" alt="IBM Quantum System One at TJ Watson Research Center"/>
+  &nbsp;&nbsp;&nbsp;
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Sycamore_Quantum_Chip.jpg/500px-Sycamore_Quantum_Chip.jpg" width="280" alt="Google Sycamore 53-qubit quantum chip on display at Deutsches Museum Munich"/>
   <br/>
-  <em>IBM Q System One - the world's first commercial quantum computer in a glass enclosure, housing dilution refrigerators that cool qubits to 15 millikelvin, colder than outer space. This is the class of hardware this project targets.</em>
+  <em>Left: IBM Quantum System One at the TJ Watson Research Center - the dilution refrigerator housing enclosure that cools qubits to 15 millikelvin, colder than outer space. Right: Google's 53-qubit Sycamore processor chip on display at the Deutsches Museum, Munich - the chip used in the 2019 quantum supremacy experiment. Both represent superconducting transmon qubit architectures, yet use different gate sets and qubit topologies. IBM uses a heavy-hex lattice with ECR native gates; Google uses a grid topology with CZ native gates. This project targets IBM hardware via Qiskit but the algorithms are architecture-agnostic.</em>
 </p>
 
 > **A hardware-ready, NISQ-era quantum computing framework** that bridges the gap between classical simulation and real IBM quantum hardware. This project gives researchers, students, and engineers an interactive environment to learn, simulate, and deploy quantum algorithms - from foundational circuits to applications in cosmology, medical research, and optimization.
@@ -754,6 +756,12 @@ This project builds on foundational academic work. The following references are 
   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Wire_Bonded_Superconducting_Quantum_Chip_with_6_Transmons_003.png/500px-Wire_Bonded_Superconducting_Quantum_Chip_with_6_Transmons_003.png" width="560" alt="Wire-bonded superconducting quantum chip with 6 transmon qubits and test junctions"/>
   <br/>
   <em>A wire-bonded superconducting quantum chip with 6 transmon qubits and 12 test junctions, rendered in detail. The gold wire bonds connect the chip to the surrounding carrier PCB, routing control pulses from room-temperature electronics down to the millikelvin stage. This is the physical layer that every circuit in this project ultimately executes on - logical gates like H and CNOT become precisely timed microwave pulses applied to these structures. Contributing a new algorithm to this project means it will eventually run on hardware that looks exactly like this.</em>
+</p>
+
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Google_Sycamore_Chip_001.png/500px-Google_Sycamore_Chip_001.png" width="560" alt="Google Sycamore quantum processor chip close-up render"/>
+  <br/>
+  <em>Google's Sycamore quantum processor - a 53-qubit superconducting chip arranged in a 2D grid topology. In 2019 this chip performed a random circuit sampling task in 200 seconds that Google estimated would take a classical supercomputer 10,000 years, marking the first claimed demonstration of quantum computational advantage (Arute et al., Nature 574, 2019). The Sycamore architecture differs from IBM's: qubits sit on a square grid where each qubit couples to 4 neighbors (vs IBM's heavy-hex where each qubit has at most 3), and the native two-qubit gate is CZ rather than ECR. QAOA and VQE circuits in this project can be adapted to either architecture by changing the transpilation target backend.</em>
 </p>
 
 Contributions are welcome. The architecture is designed so that new algorithm modules, new domain science modules, and new GUI tabs can be added independently without touching existing code.
