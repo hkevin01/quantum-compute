@@ -53,6 +53,56 @@ Quantum computing represents a fundamentally different computational paradigm. I
 
 ---
 
+## Global Quantum Hardware Landscape
+
+Quantum computing is not a single technology - it is a family of competing physical implementations, each with different strengths, qubit counts, error rates, and native gate sets. IBM and Google are the most visible players, but the field is genuinely global with major programs in the US, Canada, Europe, China, and Japan. Understanding who builds what - and *how* their hardware differs - is essential context for writing portable quantum algorithms.
+
+### Table 0 - Who Has a Quantum Computer? Major Platforms Compared
+
+| # | Organization | Country | Technology | Max Qubits (2024) | Native 2Q Gate | Cloud Access | NISQ Ready |
+|---|---|---|---|---|---|---|---|
+| 1 | <sub>IBM Quantum</sub> | <sub>USA</sub> | <sub>Superconducting transmon</sub> | <sub>433 (Osprey)</sub> | <sub>ECR</sub> | <sub>Yes - free tier</sub> | <sub>Yes</sub> |
+| 2 | <sub>Google Quantum AI</sub> | <sub>USA</sub> | <sub>Superconducting transmon</sub> | <sub>70 (Sycamore+)</sub> | <sub>CZ / fSim</sub> | <sub>Limited (partners)</sub> | <sub>Yes</sub> |
+| 3 | <sub>D-Wave Systems</sub> | <sub>Canada</sub> | <sub>Superconducting flux qubit (annealing)</sub> | <sub>5000+ (Advantage)</sub> | <sub>N/A - annealing</sub> | <sub>Yes - Leap cloud</sub> | <sub>Optimization only</sub> |
+| 4 | <sub>IonQ</sub> | <sub>USA</sub> | <sub>Trapped ion (Ytterbium)</sub> | <sub>32 (algorithmic)</sub> | <sub>MS gate (XX)</sub> | <sub>Yes - AWS/Azure</sub> | <sub>Yes</sub> |
+| 5 | <sub>Quantinuum (Honeywell)</sub> | <sub>USA/UK</sub> | <sub>Trapped ion (Ytterbium)</sub> | <sub>32 (H2)</sub> | <sub>ZZ gate</sub> | <sub>Yes - Azure</sub> | <sub>Yes - highest fidelity</sub> |
+| 6 | <sub>Rigetti Computing</sub> | <sub>USA</sub> | <sub>Superconducting transmon</sub> | <sub>84 (Ankaa)</sub> | <sub>CZ / XY</sub> | <sub>Yes - AWS</sub> | <sub>Yes</sub> |
+| 7 | <sub>Origin Quantum (USTC)</sub> | <sub>China</sub> | <sub>Superconducting</sub> | <sub>72 (Wukong)</sub> | <sub>CZ</sub> | <sub>Yes - domestic</sub> | <sub>Yes</sub> |
+| 8 | <sub>RIKEN / Fujitsu</sub> | <sub>Japan</sub> | <sub>Superconducting transmon</sub> | <sub>64</sub> | <sub>CNOT</sub> | <sub>Limited</sub> | <sub>Research</sub> |
+| 9 | <sub>PsiQuantum</sub> | <sub>USA/Australia</sub> | <sub>Photonic (silicon)</sub> | <sub>N/A (pre-production)</sub> | <sub>KLM gates</sub> | <sub>No</sub> | <sub>Future FT target</sub> |
+| 10 | <sub>NIST / Sandia</sub> | <sub>USA (govt)</sub> | <sub>Trapped ion (Beryllium/Calcium)</sub> | <sub>~50</sub> | <sub>MS gate</sub> | <sub>No (research only)</sub> | <sub>Research</sub> |
+
+> [!NOTE]
+> This project targets IBM Quantum specifically because it offers the largest free-tier cloud access, the most mature open-source SDK (Qiskit), and the widest range of qubit counts. However, every algorithm here is architecture-agnostic at the logical level - Qiskit can transpile to IonQ, Rigetti, or any other backend with the correct provider plugin.
+
+> [!IMPORTANT]
+> **D-Wave is fundamentally different.** It is a *quantum annealer*, not a gate-model quantum computer. It solves optimization problems by slowly evolving a quantum state toward its ground configuration - it cannot run Grover's, VQE, or QFT. The 5000+ "qubits" are flux qubits used for annealing, not programmable gate qubits. Do not compare D-Wave qubit counts to IBM or Google counts directly.
+
+### The Two Main Paradigms Side by Side
+
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/D-Wave-Washington-1000Q.jpg/500px-D-Wave-Washington-1000Q.jpg" width="370" alt="D-Wave 1000Q Washington quantum annealer processor chip"/>
+  &nbsp;&nbsp;&nbsp;
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Planar_Ion_Trap_%285941086002%29.jpg/500px-Planar_Ion_Trap_%285941086002%29.jpg" width="370" alt="NIST planar ion trap chip for trapped-ion quantum computing"/>
+  <br/>
+  <em>Left: D-Wave's 1000Q Washington quantum annealing processor chip - a superconducting flux qubit array where qubits are coupled in a Chimera graph topology and solved by adiabatic evolution. Right: A NIST planar ion trap chip - gold electrodes on a ceramic substrate create electromagnetic fields that suspend individual ions 40 micrometers above the surface. Each ion is a qubit; laser pulses or microwave fields perform gates. These two technologies represent completely different approaches to quantum computation: annealing vs. gate-model, and superconducting vs. trapped-ion.</em>
+</p>
+
+### Trapped-Ion vs Superconducting: The Key Tradeoff
+
+Trapped-ion computers (IonQ, Quantinuum, NIST) have significantly higher gate fidelity and much longer coherence times (seconds vs microseconds) than superconducting systems. However, they operate much slower - a two-qubit gate takes ~100 microseconds on a trapped-ion machine vs ~100 nanoseconds on IBM hardware. Superconducting systems win on speed and scalability; trapped-ion wins on accuracy per gate. For NISQ algorithms that need many shots at moderate depth, IBM is practical. For algorithms requiring very high fidelity on a small number of qubits (like Quantinuum's H-series), trapped-ion is superior.
+
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/NIST_Demonstrates_Sustained_Quantum_Processing_in_Step_Toward_Building_Quantum_Computers_%285941059262%29.jpg/500px-NIST_Demonstrates_Sustained_Quantum_Processing_in_Step_Toward_Building_Quantum_Computers_%285941059262%29.jpg" width="540" alt="NIST experimental trapped-ion quantum computing apparatus showing laser setup and vacuum chamber"/>
+  <br/>
+  <em>The full NIST trapped-ion quantum computing experimental apparatus. The ion trap chip sits inside the cylindrical vacuum chamber (center). Laser beams visible in the optics assembly are precisely steered to individual ions for single-qubit gates, while a second laser pair creates the Molmer-Sorensen (MS) entangling gate between adjacent ions. The room-temperature electronics and laser systems surrounding the vacuum chamber are the equivalent of IBM's room-temperature control rack - both architectures require massive classical infrastructure to control a small number of qubits. This is why quantum computing is currently a data-center-scale technology, not a laptop-scale one.</em>
+</p>
+
+> [!TIP]
+> If you want to run circuits on trapped-ion hardware (IonQ or Quantinuum) using this codebase, install `qiskit-ionq` or `qiskit-quantinuum-provider` and change the backend in `hardware_ready_demo.py`. The circuit logic is identical - only the transpilation target changes. IonQ is accessible via AWS Braket; Quantinuum via Azure Quantum.
+
+---
+
 ## Why Quantum Computing?
 
 Classical computers represent information as bits - discrete `0` or `1` voltages stored in transistors. As transistors approach atomic scale, the classical roadmap is hitting physical limits. Quantum computing sidesteps this entirely by exploiting quantum mechanical effects: **superposition**, **entanglement**, and **interference**.
